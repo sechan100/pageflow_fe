@@ -1,17 +1,10 @@
 'use client';
 import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { LogOut, PencilLine, Phone, UserCog } from "lucide-react";
+import UserWidget from "./UserWidget";
+import { PencilLine } from "lucide-react";
 import Link from "next/link";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button";
+import clsx from "clsx";
 
 
 
@@ -19,12 +12,19 @@ import {
 
 
 export default function Header(){
+
+
+  const session = {
+    authenticated: true
+  }
+
+  
   return (
-    <header className="flex justify-between items-center">
+    <header className="flex justify-between items-center container mt-5">
       <Title />
       <div className="flex items-center">
-        <WriteButton mr={2} />
-        <User mr={2} />
+        <WriteLinkBtn authenticated={session.authenticated} />
+        <UserWidget className="mx-2" session={session} />
         <ThemeSwitcher />
       </div>
     </header>
@@ -33,61 +33,18 @@ export default function Header(){
 
 function Title(){
   return (
-    <h1 className="text-3xl font-bold">
+    <h1 className="text-3xl py-3">
       <a href="/">Pageflow</a>
     </h1>
   )
 }
 
-function WriteButton({mr} : {mr: number}) {
+function WriteLinkBtn({authenticated} : {authenticated: boolean}){
   return (
-    <Link href="/book/write" className={"mr-" + mr}>
+    <Link href="/book/write" className={clsx({"hidden": !authenticated})}>
       <Button variant="outline" className="rounded-full">
         <PencilLine className="mr-1" /> 집필하기
       </Button>
-    </Link>
-  )
-}
-
-
-function User({mr} : {mr: number}){
-
-
-  return (
-    <div className={"mr-" + mr}>
-      <DropdownMenu modal>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" asChild>
-            <div className="flex items-center justify-between">
-              <Avatar className="mr-1">
-                <AvatarImage
-                  src="https://avatars.githubusercontent.com/u/4233953?v=4"
-                  alt="profile image"
-                />
-                <AvatarFallback>페플</AvatarFallback>
-              </Avatar>
-              <span>pageflow 작가님</span>
-            </div>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>100yearschan@gmail.com</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DDLink href="/account" name="계정 설정" icon={<UserCog />} />
-          <DDLink href="/support" name="고객센터" icon={<Phone />} />
-          <DDLink href="/logout" name="로그아웃" icon={<LogOut />} />
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  )
-}
-
-function DDLink({href, name, icon} : {href: string, name: string, icon: React.ReactNode}){
-  return (
-    <Link href={href} className="flex items-center">
-      <DropdownMenuItem className="w-full cursor-pointer">
-        {icon}<span className="ml-2">{name}</span>
-      </DropdownMenuItem>
     </Link>
   )
 }

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
 import Header from "./Header";
+import React from "react";
+import GlobalProviders from "./GlobalProviders";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,15 +17,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
   return (
     <html lang="ko">
+      <head />
       <body className={inter.className}>
-        <div className="container my-5">
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <Header />
+        <GlobalProviders>
+          <Header />
+          <div className="container">
             {children}
-          </ThemeProvider>
-        </div>
+          </div>
+        </GlobalProviders>
       </body>
     </html>
   );
