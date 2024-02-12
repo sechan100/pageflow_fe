@@ -1,10 +1,10 @@
 'use client';
 import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
-import UserWidget from "./UserWidget";
+import UserWidget from "../widget/UserWidget";
 import { PencilLine } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import LoginBtn from "./LoginBtn";
+import LoginBtn from "../widget/LoginBtn";
 
 
 

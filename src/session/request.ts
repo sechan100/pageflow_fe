@@ -3,7 +3,7 @@ import { AccessTokenStorage } from "./token/AccessTokenStorage";
 
 
 
-class Request {
+export class Request {
 
   #accessTokenStorage: AccessTokenStorage;
   #api: AxiosInstance;
@@ -26,8 +26,9 @@ class Request {
       // 토큰이 존재한다면, Authorization 헤더를 추가함
       if(storage.isTokenExist()){
         config.headers["Authorization"] = storage.getToken();
+        console.debug("[인증된 사용자]: 사용자의 AccessToken을 헤더에 포함했습니다.", storage.getToken())
       }
-
+      console.debug("axios interceptor가 설정객체를 에러없이 반환하였습니다.")
       return config;
     } 
 

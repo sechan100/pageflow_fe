@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import axios from "axios";
+import { sessionContext } from "@/app/GlobalProviders";
+import { useContext } from "react";
 
 
 export default function LoginBtn({className} : {className?: string}){
@@ -32,7 +34,7 @@ export default function LoginBtn({className} : {className?: string}){
 
       {/* Dialog 팝업시에... */}
       <DialogContent>
-        <FormComponent />
+        <LoginForm />
       </DialogContent>
     </Dialog>
   </div>
@@ -40,7 +42,9 @@ export default function LoginBtn({className} : {className?: string}){
 }
 
 
-function FormComponent(){
+function LoginForm(){
+
+  const {sessionManager, api} = useContext(sessionContext);
 
 
   const loginFormSchema = z.object({
@@ -67,7 +71,7 @@ function FormComponent(){
     })
 
     function onSubmit(values: z.infer<typeof loginFormSchema>) {
-      axios.post("/login", values)
+      api.post("/login", values)
     }
 
 

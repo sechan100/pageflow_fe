@@ -12,7 +12,7 @@ interface ClientSession {
 }
 
 // AccessTokenStorage를 관리하고, 세션과 관련한 활동들을 중앙집권적으로 처리한다.
-class SessionManager {
+export class SessionManager {
 
   // Properties
   #accessTokenStorage: AccessTokenStorage
