@@ -17,35 +17,9 @@ import {
 
 
 
-export default function UserWidget({className, session} : {className?: string, session: {authenticated: boolean}}){
-
+export default function UserWidget({className} : {className?: string}){
   return (
     <div className={className}>
-      {session.authenticated && <LoginedUser /> || <AnonymousUser />} 
-    </div>
-  )
-}
-
-
-
-
-
-
-
-
-function AnonymousUser(){
-  return (
-    <Link href="/login">
-      <Button variant="outline" className="rounded-full">
-        로그인
-      </Button>
-    </Link>
-  )
-}
-
-function LoginedUser(){
-  return (
-    <>
       <DropdownMenu modal>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-full cursor-pointer" asChild>
@@ -74,7 +48,7 @@ function LoginedUser(){
           <DDLink href="/logout" name="로그아웃" icon={<LogOut />} />
         </DropdownMenuContent>
       </DropdownMenu>
-    </>
+    </div>
   )
 }
 
@@ -87,17 +61,4 @@ function DDLink({href, name, icon} : {href: string, name: string, icon: React.Re
       </DropdownMenuItem>
     </Link>
   )
-}
-
-function _getUserSession(UID: number){
-  return {
-    isLogin: false,
-    user: {
-      id: 1,
-      username: "pageflow",
-      email: "email12944@pageflow.org",
-      profileImgUrl: "https://avatars.githubusercontent.com/u/4233953?v=4",
-      penname: "페플러"
-    }
-  }
 }

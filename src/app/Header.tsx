@@ -4,7 +4,7 @@ import UserWidget from "./UserWidget";
 import { PencilLine } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import clsx from "clsx";
+import LoginBtn from "./LoginBtn";
 
 
 
@@ -15,7 +15,7 @@ export default function Header(){
 
 
   const session = {
-    authenticated: true
+    authenticated: false
   }
 
   
@@ -23,8 +23,17 @@ export default function Header(){
     <header className="flex justify-between items-center container mt-5">
       <Title />
       <div className="flex items-center">
-        <WriteLinkBtn authenticated={session.authenticated} />
-        <UserWidget className="mx-2" session={session} />
+        {session.authenticated && 
+        // 로그인
+        <>
+          <WriteLinkBtn />
+          <UserWidget className="mx-2" />
+        </> ||
+        // 비회원
+        <>
+          <LoginBtn className="mx-2" />
+        </>
+        }
         <ThemeSwitcher />
       </div>
     </header>
@@ -39,9 +48,9 @@ function Title(){
   )
 }
 
-function WriteLinkBtn({authenticated} : {authenticated: boolean}){
+function WriteLinkBtn(){
   return (
-    <Link href="/book/write" className={clsx({"hidden": !authenticated})}>
+    <Link href="/book/write">
       <Button variant="outline" className="rounded-full">
         <PencilLine className="mr-1" /> 집필하기
       </Button>
