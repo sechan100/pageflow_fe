@@ -1,5 +1,5 @@
 import deepFreeze from "@/lib/freeze";
-import { AccessTokenDto, AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "./token/AccessTokenStorage";
+import { AccessTokenDto, AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "./AccessTokenStorage";
 
 // Client Side Session 정의
 interface ClientSession {

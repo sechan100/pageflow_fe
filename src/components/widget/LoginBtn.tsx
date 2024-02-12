@@ -46,7 +46,6 @@ function LoginForm(){
 
   const {sessionManager, api} = useContext(sessionContext);
 
-
   const loginFormSchema = z.object({
     username: z.string()
     .min(1, "아이디를 입력해주세요.")

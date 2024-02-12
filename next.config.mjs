@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 
-  async rewrites() { // production에서는 사용하지 않음 / proxy 설정
+  async rewrites() { // proxy 설정
     return [
       {
-        source: '/:path*',
-        destination: `http://localhost:8888/:path*`,
+        source: `${process.env.NEXT_PUBLIC_API_PREFIX}/:path*`,
+        destination: `${process.env.NEXT_PUBLIC_API_HOST}/:path*`,
       },
     ];
   },

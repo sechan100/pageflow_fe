@@ -2,8 +2,8 @@
 
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { SessionManager } from "@/session/SessionManager";
-import { Request } from "@/session/request";
-import { AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/session/token/AccessTokenStorage";
+import { Request } from "@/api/request";
+import { AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/session/AccessTokenStorage";
 import { AxiosInstance } from "axios";
 import { createContext } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";

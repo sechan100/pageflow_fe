@@ -20,7 +20,10 @@ export default function RootLayout({
 
 
   return (
-    <html lang="ko">
+    <html 
+      suppressHydrationWarning={true} // 서버와 클라 렌더링 간의 불일치 경고를 무시.(간혹 일치시키는 것이 매우 어렵거나 불가능함)
+      lang="ko"
+      >
       <head />
       <body className={inter.className}>
         <GlobalProviders>
