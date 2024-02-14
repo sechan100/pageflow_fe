@@ -1,10 +1,10 @@
 'use client';
 import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
-import UserWidget from "../widget/UserWidget";
+import UserWidget from "../../components/widget/UserWidget";
 import { PencilLine } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import LoginBtn from "../widget/LoginBtn";
+import Entrypoint from "../user/entrypoint/Entrypoint";
 
 
 
@@ -31,7 +31,7 @@ export default function Header(){
         </> ||
         // 비회원
         <>
-          <LoginBtn className="mx-2" />
+          <Entrypoint className="mx-2" />
         </>
         }
         <ThemeSwitcher />

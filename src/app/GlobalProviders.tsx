@@ -1,9 +1,9 @@
 'use client';
 
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { SessionManager } from "@/session/SessionManager";
-import { Request } from "@/api/request";
-import { AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/session/AccessTokenStorage";
+import { SessionManager } from "@/bounded-context/user/session/SessionManager";
+import { Request } from "@/apis/request";
+import { AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/bounded-context/user/session/AccessTokenStorage";
 import { AxiosInstance } from "axios";
 import { createContext } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";

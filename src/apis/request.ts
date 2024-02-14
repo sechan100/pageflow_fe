@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
-import { AccessTokenStorage } from "../session/AccessTokenStorage";
+import { AccessTokenStorage } from "../bounded-context/user/session/AccessTokenStorage";
 
 
 
