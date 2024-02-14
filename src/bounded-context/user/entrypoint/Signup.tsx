@@ -70,23 +70,28 @@ function SignupDialogForm(){
     penname: zodUserSchemata.penname,
   })
 
-    const signupForm = useForm<z.infer<typeof signupFormSchema>>({
-      resolver: zodResolver(signupFormSchema),
-      defaultValues: {
-        username: "",
-        passwordSchema: {
-          password: "",
-          passwordConfirm: "",
-        },
-        email: "",
-        penname: "",
+  const signupForm = useForm<z.infer<typeof signupFormSchema>>({
+    resolver: zodResolver(signupFormSchema),
+    defaultValues: {
+      username: "sechan100",
+      passwordSchema: {
+        password: "sechan100",
+        passwordConfirm: "sechan100",
       },
-    })
+      email: "sechan100@gmail.com",
+      penname: "sechan100",
+    },
+  })
 
-    function onSubmit(values: z.infer<typeof signupFormSchema>) {
-      api.post("/Signup", values)
+  function onSubmit(values: z.infer<typeof signupFormSchema>) {
+    const body = {
+      username: values.username,
+      password: values.passwordSchema.password,
+      email: values.email,
+      penname: values.penname,
     }
-
+    api.post("/signup", body)
+  }
 
   return (
     <Form {...signupForm}>
@@ -131,6 +136,21 @@ function SignupDialogForm(){
               <FormLabel className="text-white">비밀번호 확인</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="passwordConfirm" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* email 필드 */}
+        <FormField
+          control={signupForm.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">이메일</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
