@@ -26,7 +26,7 @@ export class SessionManager {
 
 
   isAuthenticated(): boolean {
-    return this.#session !== null;
+    return this.#session !== null || this.#accessTokenStorage.getToken() !== null;
   }
 
   setSession(session: ClientSession) {
