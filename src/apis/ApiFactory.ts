@@ -1,24 +1,28 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { AccessTokenStorage } from "../bounded-context/user/session/AccessTokenStorage";
+import { RequestBuilder } from "./RequestBuilder";
 
 
 
-export class Request {
+export class ApiFactory {
 
   #accessTokenStorage: AccessTokenStorage;
   #api: AxiosInstance;
+  #anonymousApi: AxiosInstance;
 
   
   constructor(accessTokenStorage: AccessTokenStorage) {
     this.#accessTokenStorage = accessTokenStorage;
     this.#api = this.init(accessTokenStorage);
+    this.#anonymousApi = this.anonymous();
   }
 
-
   private init(storage: AccessTokenStorage){
-
     if(!process.env.NEXT_PUBLIC_CLIENT_HOST){
       throw new Error("NEXT_PUBLIC_CLIENT_HOST 환경변수가 설정되지 않았습니다.")
+    }
+    if(!process.env.NEXT_PUBLIC_API_PREFIX){
+      throw new Error("NEXT_PUBLIC_API_PREFIX 환경변수가 설정되지 않았습니다.")
     }
 
     // axios 요청객체 정의
@@ -38,7 +42,7 @@ export class Request {
       }
       
       return config;
-    } 
+    }
 
     // Axios Error Interceptor
     const interceptorErrorCallback = (err : AxiosError) => {
@@ -50,19 +54,50 @@ export class Request {
 
     return api;
   }
+  private anonymous(){
+    if(!process.env.NEXT_PUBLIC_CLIENT_HOST){
+      throw new Error("NEXT_PUBLIC_CLIENT_HOST 환경변수가 설정되지 않았습니다.")
+    }
+    if(!process.env.NEXT_PUBLIC_API_PREFIX){
+      throw new Error("NEXT_PUBLIC_API_PREFIX 환경변수가 설정되지 않았습니다.")
+    }
 
-
-  api(): AxiosInstance {
-    return this.#api;
-  }
-
-
-  anonymous(){
     return axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_HOST
+      baseURL: process.env.NEXT_PUBLIC_CLIENT_HOST + process.env.NEXT_PUBLIC_API_PREFIX
     });
   }
+
+
+  get(url: string){
+    return new RequestBuilder(this.#api, "GET", url);
+  }
+
+  post(url: string){
+    return new RequestBuilder(this.#api, "POST", url);
+  }
+
+  put(url: string){
+    return new RequestBuilder(this.#api, "PUT", url);
+  }
+
+  delete(url: string){
+    return new RequestBuilder(this.#api, "DELETE", url);
+  }
+
+  anonymousGet(url: string){
+    return new RequestBuilder(this.#anonymousApi, "GET", url);
+  }
+
+  anonymousPost(url: string){
+    return new RequestBuilder(this.#anonymousApi, "POST", url);
+  }
+
+  anonymousPut(url: string){
+    return new RequestBuilder(this.#anonymousApi, "PUT", url);
+  }
+
+  anonymousDelete(url: string){
+    return new RequestBuilder(this.#anonymousApi, "DELETE", url);
+  }
 }
-
-
 

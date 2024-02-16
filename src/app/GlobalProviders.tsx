@@ -2,9 +2,8 @@
 
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { SessionManager } from "@/bounded-context/user/session/SessionManager";
-import { Request } from "@/apis/request";
+import { ApiFactory } from "@/apis/ApiFactory";
 import { AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/bounded-context/user/session/AccessTokenStorage";
-import { AxiosInstance } from "axios";
 import { createContext } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 
@@ -12,7 +11,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 
 const queryClient = reactQueryConfig();
 
-const session = sessionManagerConfig()
+const session = initSession()
 export const sessionContext = createContext<SessionContext>(session);
 
 
@@ -48,20 +47,20 @@ function reactQueryConfig(): QueryClient{
   return queryClient;
 }
 
-function sessionManagerConfig(): SessionContext{
+function initSession(): SessionContext {
   // AccessTokenStorage
   const accessTokenStorage: AccessTokenStorage = new PrivatePropertyAccessTokenStorage();
   // 세션 관리자
   const sessionManager = new SessionManager(accessTokenStorage);
   // ApiRequest
-  const request = new Request(accessTokenStorage);
+  const request = new ApiFactory(accessTokenStorage);
 
   return {
     sessionManager: sessionManager,
-    api: request.api()
+    api: request
   }
 }
 export interface SessionContext {
   sessionManager: SessionManager;
-  api: AxiosInstance;
+  api: ApiFactory;
 }

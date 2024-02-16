@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import { sessionContext } from "@/app/GlobalProviders";
 import { useContext } from "react";
 import { zodUserSchemata } from "@/constants/zod/UserSchemata";
+import { AccessTokenDto } from "../session/AccessTokenStorage";
 
 
 export default function LoginTrigger({className}: {className?: string}){
@@ -52,13 +53,20 @@ function LoginDialogForm(){
     const loginForm = useForm<z.infer<typeof loginFormSchema>>({
       resolver: zodResolver(loginFormSchema),
       defaultValues: {
-        username: "",
-        password: "",
+        username: "testuser1",
+        password: "testuser1",
       },
     })
 
-    function onSubmit(values: z.infer<typeof loginFormSchema>) {
-      api.post("/login", values)
+    async function onSubmit(UnAndPw: z.infer<typeof loginFormSchema>) {
+      //TODO: api에서 데이터 타입만 제네릭으로 전달하면, 알아서 객체를 처리해서 타입에 맞게 반환해주는 중앙화 로직 구현하기
+      const accessToken: AccessTokenDto = await 
+      api.anonymousPost("/login")
+      .data(UnAndPw)
+      .fetch<AccessTokenDto>();
+
+      // 토큰 저장
+      sessionManager.saveToken(accessToken);
     }
 
 

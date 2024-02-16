@@ -73,24 +73,28 @@ function SignupDialogForm(){
   const signupForm = useForm<z.infer<typeof signupFormSchema>>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
-      username: "sechan100",
+      username: "testuser1",
       passwordSchema: {
-        password: "sechan100",
-        passwordConfirm: "sechan100",
+        password: "testuser1",
+        passwordConfirm: "testuser1",
       },
-      email: "sechan100@gmail.com",
-      penname: "sechan100",
+      email: "testuser1@pageflow.org",
+      penname: "테스트유저일",
     },
   })
 
   function onSubmit(values: z.infer<typeof signupFormSchema>) {
-    const body = {
+    const signupForm = {
       username: values.username,
       password: values.passwordSchema.password,
       email: values.email,
       penname: values.penname,
     }
-    api.post("/signup", body)
+
+    // 회원가입 요청 전송
+    api.anonymousPost("/signup")
+    .data(signupForm)
+    .execute();
   }
 
   return (
