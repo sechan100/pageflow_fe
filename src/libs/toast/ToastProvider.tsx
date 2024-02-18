@@ -1,9 +1,7 @@
-import UserWidget from "@/bounded-context/user/widget/UserWidget";
 import { ToastAction } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import EventEmitter from "@/libs/event/EventEmitter";
-import { Dropdown } from "react-day-picker";
 
 
 
@@ -11,8 +9,8 @@ import { Dropdown } from "react-day-picker";
 interface ToastContext {
   variant?: "default" | "destructive";
   title?: string;
-  description?: string;
-  action: {
+  description: string;
+  action?: {
     description: string;
     onClick: () => void;
   }

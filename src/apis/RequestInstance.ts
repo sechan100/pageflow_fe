@@ -1,3 +1,4 @@
+import { triggerToast } from "@/libs/toast/ToastProvider";
 import { AxiosInstance, AxiosRequestConfig, Method } from "axios";
 
 
@@ -60,29 +61,38 @@ export class RequestInstance {
    * 만약 actions에 해당 코드에 대한 핸들러가 정의되지 않은 경우, 에러를 발생시킨다.
    */
   private async request<T = any>(): Promise<T> {
-    const axiosRes = await this.#axios.request<T>(this.#config);
-    const res = axiosRes.data as GlobalResponse<T>;
-    
-    // 성공하지 못했다면 Actions에서 코드에 따른 핸들러를 호출
-    if(res.code !== "SUCCESS"){
-      if(this.#actions && res.code in this.#actions && typeof this.#actions[res.code] === "function"){
-        try {
-          console.debug(`[응답 코드에 의한 분기]: 코드 [${res.code}]가 발생하여, 정의된 Action을 호출합니다.`);
-          this.#actions[res.code](res.data);
-          return Promise.reject(new RejectedForCodeActionCall(res.code, res.message));
-
-        // action 내부에서 에러가 발생한 경우
-        } catch(e: any) {
-          throw new Error(`[CodeAction Error]: [${res.code}]으로 정의된 CodeAction 호출중 에러가 발생했습니다. \n Callback Actions 에러: ${e.message}`);
+    try {
+      const axiosRes = await this.#axios.request<T>(this.#config);
+      const res = axiosRes.data as GlobalResponse<T>;
+      
+      // 성공하지 못했다면 Actions에서 코드에 따른 핸들러를 호출
+      if(res.code !== "SUCCESS"){
+        if(this.#actions && res.code in this.#actions && typeof this.#actions[res.code] === "function"){
+          try {
+            console.debug(`[응답 코드에 의한 분기]: 코드 [${res.code}]가 발생하여, 정의된 Action을 호출합니다.`);
+            this.#actions[res.code](res.data);
+            return Promise.reject(new RejectedForCodeActionCall(res.code, res.message));
+  
+          // action 내부에서 에러가 발생한 경우
+          } catch(e: any) {
+            throw new Error(`[CodeAction Error]: [${res.code}]으로 정의된 CodeAction 호출중 에러가 발생했습니다. \n Callback Actions 에러: ${e.message}`);
+          }
+          
+        // 정의된 actions가 없거나, actions에서 해당 코드에 대한 핸들러를 찾을 수 없는 경우
+        } else {
+          throw new Error(`[CodeAction never defined]: [${res.code}]("${res.message}") 코드에 대한 CodeAction이 정의되지 않았습니다. `);
         }
-        
-      // 정의된 actions가 없거나, actions에서 해당 코드에 대한 핸들러를 찾을 수 없는 경우
+      // 성공했다면, 데이터를 반환
       } else {
-        throw new Error(`[CodeAction never defined]: [${res.code}]("${res.message}") 코드에 대한 CodeAction이 정의되지 않았습니다. `);
+        return res.data;
       }
-    // 성공했다면, 데이터를 반환
-    } else {
-      return res.data;
+    } catch(e: any){
+      triggerToast({
+        variant: "destructive",
+        title: "요청 실패",
+        description: "서버 요청 중 문제가 발생했습니다. 잠시후 다시 시도해주세요.",
+      })
+      return Promise.reject(e);
     }
   }
 
