@@ -1,4 +1,6 @@
-class EventEmitter {
+
+
+export default class EventEmitter {
   // [[ 싱글턴 
   static #instance: EventEmitter | null = null;
   static getInstance(): EventEmitter {

@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { AccessTokenStorage } from "../bounded-context/user/session/AccessTokenStorage";
-import { RequestBuilder } from "./RequestBuilder";
+import { RequestInstance } from "./RequestInstance";
 
 
 
@@ -8,16 +8,15 @@ export class ApiFactory {
 
   #accessTokenStorage: AccessTokenStorage;
   #api: AxiosInstance;
-  #anonymousApi: AxiosInstance;
 
   
   constructor(accessTokenStorage: AccessTokenStorage) {
     this.#accessTokenStorage = accessTokenStorage;
     this.#api = this.init(accessTokenStorage);
-    this.#anonymousApi = this.anonymous();
   }
 
-  private init(storage: AccessTokenStorage){
+  // 기본적인 Axios 요청 객체를 생성하여 반환함
+  private static newDefaultAxiosInstance(){
     if(!process.env.NEXT_PUBLIC_CLIENT_HOST){
       throw new Error("NEXT_PUBLIC_CLIENT_HOST 환경변수가 설정되지 않았습니다.")
     }
@@ -25,22 +24,22 @@ export class ApiFactory {
       throw new Error("NEXT_PUBLIC_API_PREFIX 환경변수가 설정되지 않았습니다.")
     }
 
-    // axios 요청객체 정의
-    const api = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_CLIENT_HOST + process.env.NEXT_PUBLIC_API_PREFIX,
+    return axios.create({
+      baseURL: process.env.NEXT_PUBLIC_CLIENT_HOST + process.env.NEXT_PUBLIC_API_PREFIX
     });
-    
-    // Axios Interceptor
-    const interceptorCallBack = (config : InternalAxiosRequestConfig<any>) => {
-      config.headers['Content-type'] = 'application/json; charset=UTF-8';
-      config.headers['Accept'] = 'application/json';
+  }
 
-      // 토큰이 존재한다면, Authorization 헤더를 추가함
-      if(storage.isTokenExist()){
-        config.headers["Authorization"] = storage.getToken();
-        console.debug("[인증된 사용자]: 사용자의 AccessToken을 헤더에 포함했습니다.", storage.getToken())
-      }
-      
+  private init(storage: AccessTokenStorage){
+    // 기본 요청 객체에 interceptor를 추가하기 위해, 새로운 요청체를 생성
+    const api = ApiFactory.newDefaultAxiosInstance();
+    
+    // Axios async Interceptor 정의
+    const interceptorCallBack = async (config : InternalAxiosRequestConfig<any>) => {
+      config.headers['Content-type'] = 'application/json; charset=UTF-8'; // 요청타입 헤더
+      config.headers['Accept'] = 'application/json'; // 응답타입 헤더
+      // 토큰 설정(await)
+      config.headers["Authorization"] = await storage.ensureValidToken();
+
       return config;
     }
 
@@ -54,50 +53,38 @@ export class ApiFactory {
 
     return api;
   }
-  private anonymous(){
-    if(!process.env.NEXT_PUBLIC_CLIENT_HOST){
-      throw new Error("NEXT_PUBLIC_CLIENT_HOST 환경변수가 설정되지 않았습니다.")
-    }
-    if(!process.env.NEXT_PUBLIC_API_PREFIX){
-      throw new Error("NEXT_PUBLIC_API_PREFIX 환경변수가 설정되지 않았습니다.")
-    }
-
-    return axios.create({
-      baseURL: process.env.NEXT_PUBLIC_CLIENT_HOST + process.env.NEXT_PUBLIC_API_PREFIX
-    });
-  }
 
 
   get(url: string){
-    return new RequestBuilder(this.#api, "GET", url);
+    return new RequestInstance(this.#api, "GET", url);
   }
 
   post(url: string){
-    return new RequestBuilder(this.#api, "POST", url);
+    return new RequestInstance(this.#api, "POST", url);
   }
 
   put(url: string){
-    return new RequestBuilder(this.#api, "PUT", url);
+    return new RequestInstance(this.#api, "PUT", url);
   }
 
   delete(url: string){
-    return new RequestBuilder(this.#api, "DELETE", url);
+    return new RequestInstance(this.#api, "DELETE", url);
   }
 
-  anonymousGet(url: string){
-    return new RequestBuilder(this.#anonymousApi, "GET", url);
+  static anonymousGet(url: string){
+    return new RequestInstance(ApiFactory.newDefaultAxiosInstance(), "GET", url);
   }
 
-  anonymousPost(url: string){
-    return new RequestBuilder(this.#anonymousApi, "POST", url);
+  static anonymousPost(url: string){
+    return new RequestInstance(ApiFactory.newDefaultAxiosInstance(), "POST", url);
   }
 
-  anonymousPut(url: string){
-    return new RequestBuilder(this.#anonymousApi, "PUT", url);
+  static anonymousPut(url: string){
+    return new RequestInstance(ApiFactory.newDefaultAxiosInstance(), "PUT", url);
   }
 
-  anonymousDelete(url: string){
-    return new RequestBuilder(this.#anonymousApi, "DELETE", url);
+  static anonymousDelete(url: string){
+    return new RequestInstance(ApiFactory.newDefaultAxiosInstance(), "DELETE", url);
   }
 }
 

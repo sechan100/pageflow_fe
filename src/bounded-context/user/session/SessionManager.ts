@@ -1,4 +1,4 @@
-import deepFreeze from "@/libs/freeze";
+import deepFreeze from "@/libs/util/freeze";
 import { AccessTokenDto, AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "./AccessTokenStorage";
 
 // Client Side Session 정의
@@ -26,7 +26,7 @@ export class SessionManager {
 
 
   isAuthenticated(): boolean {
-    return this.#session !== null || this.#accessTokenStorage.getToken() !== null;
+    return this.#session !== null || this.#accessTokenStorage.isTokenExist() !== null;
   }
 
   setSession(session: ClientSession) {
@@ -42,7 +42,7 @@ export class SessionManager {
     this.#session = null;
   }
 
-  saveToken(accessTokenDto: AccessTokenDto){
-    this.#accessTokenStorage.save(accessTokenDto);
+  storeToken(accessTokenDto: AccessTokenDto){
+    this.#accessTokenStorage.store(accessTokenDto);
   }
 }

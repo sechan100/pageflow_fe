@@ -1,29 +1,50 @@
 'use client';
 
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { ThemeProvider } from "@/libs/theme/ThemeProvider";
 import { SessionManager } from "@/bounded-context/user/session/SessionManager";
 import { ApiFactory } from "@/apis/ApiFactory";
 import { AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/bounded-context/user/session/AccessTokenStorage";
-import { createContext } from "react";
+import { createContext, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-
+import { RejectedForCodeActionCall } from "@/apis/RequestInstance";
+import ToastProvider from "@/libs/toast/ToastProvider";
 
 
 const queryClient = reactQueryConfig();
-
-const session = initSession()
-export const sessionContext = createContext<SessionContext>(session);
-
+export const SessionContext = createContext<SessionContext>(initSession());
 
 
 
 export default function GlobalProviders({children} : {children: React.ReactNode}){
+
+  useEffect(() => {
+
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason;
+      // CodeActions에 의해서 이미 처리된 Promise인 경우 무시
+      if(reason instanceof RejectedForCodeActionCall){
+        console.debug(`${reason.name}가 Action에 의해서 올바르게 처리되었습니다.`);
+        event.preventDefault();
+        return;
+      }
+    };
+
+    // 거부된 프로미스 처리 로직
+    window.addEventListener('unhandledrejection', handleRejection);
+  
+    return () => {
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
+  }, []);
+
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <QueryClientProvider client={queryClient}>
-        <sessionContext.Provider value={session}>
-          {children}
-        </sessionContext.Provider>
+        <SessionContext.Provider value={initSession()}>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </SessionContext.Provider>
       </QueryClientProvider>
     </ThemeProvider>
   )
@@ -60,6 +81,7 @@ function initSession(): SessionContext {
     api: request
   }
 }
+
 export interface SessionContext {
   sessionManager: SessionManager;
   api: ApiFactory;

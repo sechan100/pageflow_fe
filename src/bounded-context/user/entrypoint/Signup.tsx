@@ -18,9 +18,10 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { sessionContext } from "@/app/GlobalProviders";
+import { SessionContext } from "@/app/GlobalProviders";
 import { useContext } from "react";
 import { zodUserSchemata } from "@/constants/zod/UserSchemata";
+import { ApiFactory } from "@/apis/ApiFactory";
 
 
 
@@ -44,8 +45,6 @@ export default function SignupTrigger({className}: {className?: string}){
 
 
 function SignupDialogForm(){
-
-  const {sessionManager, api} = useContext(sessionContext);
 
   // Zod 스키마 정의
   const signupFormSchema = z.object({
@@ -92,7 +91,7 @@ function SignupDialogForm(){
     }
 
     // 회원가입 요청 전송
-    api.anonymousPost("/signup")
+    ApiFactory.anonymousPost("/signup")
     .data(signupForm)
     .execute();
   }

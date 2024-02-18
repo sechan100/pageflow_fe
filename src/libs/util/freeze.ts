@@ -1,4 +1,6 @@
-function deepFreeze(object) {
+
+
+function deepFreeze(object: any) {
   // 먼저 객체 자신을 동결
   Object.freeze(object);
   

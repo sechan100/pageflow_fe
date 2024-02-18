@@ -1,6 +1,6 @@
 'use client';
-import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
-import UserWidget from "../../components/widget/UserWidget";
+import { ThemeSwitcher } from "@/libs/theme/ThemeSwitcher";
+import UserWidget from "../user/widget/UserWidget";
 import { PencilLine } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
