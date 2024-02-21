@@ -1,5 +1,5 @@
 'use client';
-import { ThemeSwitcher } from "@/libs/theme/ThemeSwitcher";
+import { ThemeSwitcher } from "@/global/theme/ThemeSwitcher";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@radix-ui/react-navigation-menu";

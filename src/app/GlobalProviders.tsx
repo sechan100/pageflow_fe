@@ -1,13 +1,13 @@
 'use client';
 
-import { ThemeProvider } from "@/libs/theme/ThemeProvider";
-import { SessionManager } from "@/bounded-context/user/session/SessionManager";
-import { ApiFactory } from "@/apis/ApiFactory";
-import { AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/bounded-context/user/session/AccessTokenStorage";
+import { ThemeProvider } from "@/global/theme/ThemeProvider";
+import { SessionManager } from "@/hooks/useSession";
+import { DefaultAxiosFactory } from "@/api/AnonymousApi";
+import { AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/api/AccessTokenStorage";
 import { createContext, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { RejectedForCodeActionCall } from "@/apis/RequestInstance";
-import ToastProvider from "@/libs/toast/ToastProvider";
+import { RejectedForCodeActionCall } from "@/api/RequestInstance";
+import ToastProvider from "@/global/toast/ToastProvider";
 
 
 const queryClient = reactQueryConfig();
@@ -74,7 +74,7 @@ function initSession(): SessionContext {
   // 세션 관리자
   const sessionManager = new SessionManager(accessTokenStorage);
   // ApiRequest
-  const request = new ApiFactory(accessTokenStorage);
+  const request = new DefaultAxiosFactory(accessTokenStorage);
 
   return {
     sessionManager: sessionManager,
@@ -84,5 +84,5 @@ function initSession(): SessionContext {
 
 export interface SessionContext {
   sessionManager: SessionManager;
-  api: ApiFactory;
+  api: DefaultAxiosFactory;
 }

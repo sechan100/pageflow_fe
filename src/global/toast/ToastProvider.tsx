@@ -8,8 +8,8 @@ import EventEmitter from "@/libs/event/EventEmitter";
 
 interface ToastContext {
   variant?: "default" | "destructive";
-  title?: string;
-  description: string;
+  title: string;
+  description?: string;
   action?: {
     description: string;
     onClick: () => void;

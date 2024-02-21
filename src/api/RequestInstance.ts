@@ -1,5 +1,7 @@
-import { triggerToast } from "@/libs/toast/ToastProvider";
+import { CodeType } from "@/constants/response-code/ResponseCode";
+import { triggerToast } from "@/global/toast/ToastProvider";
 import { AxiosInstance, AxiosRequestConfig, Method } from "axios";
+import { Dispatch, SetStateAction } from "react";
 
 
 
@@ -20,25 +22,50 @@ export class RejectedForCodeActionCall {
 
 
 
-export class RequestInstance {
+export class AsyncApiBuilder {
 
   #axios: AxiosInstance;
   #config: AxiosRequestConfig;
   #actions: CodeActions;
+  #setCode: Dispatch<SetStateAction<string>>;
 
-  constructor(axios: AxiosInstance, method: Method, url: string){
+  constructor(axios: AxiosInstance, setCode: Dispatch<SetStateAction<string>>){
     this.#axios = axios;
-    this.#config = {
-      method,
-      url
-    };
+    this.#config = {};
     this.#actions = {};
+    this.#setCode = setCode;
+  }
+
+  get(url: string){
+    this.#config.method = "GET";
+    this.#config.url = url;
+    return this;
+  }
+  post(url: string){
+    this.#config.method = "POST";
+    this.#config.url = url;
+    return this;
+  }
+  put(url: string){
+    this.#config.method = "PUT";
+    this.#config.url = url;
+    return this;
+  }
+  delete(url: string){
+    this.#config.method = "DELETE";
+    this.#config.url = url;
+    return this;
   }
 
 
   // Response Code별 처리 핸들러 정의서
   actions(actions: CodeActions){
     this.#actions = actions;
+    return this;
+  }
+
+  action(code: string, action: (data: any) => void){
+    this.#actions[code] = action;
     return this;
   }
 
@@ -54,19 +81,31 @@ export class RequestInstance {
     return this;
   }
 
+  // 요청타입 헤더
+  contentType(type: string){
+    this.#config.headers = {
+      ...this.#config.headers,
+      "Content-type": type
+    };
+    return this;
+  }
+
 
   /*
    * 서버의 응답 코드에 따라서 SUCCESS 코드인 경우 응답된 데이터를 반환하고, 
    * 그 외의 코드의 경우는 actions 객체에서 정의된 핸들러를 호출한다.
    * 만약 actions에 해당 코드에 대한 핸들러가 정의되지 않은 경우, 에러를 발생시킨다.
    */
-  private async request<T = any>(): Promise<T> {
+  async fetch<T>(): Promise<T> {
     try {
       const axiosRes = await this.#axios.request<T>(this.#config);
       const res = axiosRes.data as GlobalResponse<T>;
+
+      // useApi 훅으로 반환한 code값의 상태를 업데이트.(default value: LOADING)
+      this.#setCode(res.code);
       
       // 성공하지 못했다면 Actions에서 코드에 따른 핸들러를 호출
-      if(res.code !== "SUCCESS"){
+      if(res.code !== CodeType.common.SUCCESS){
         if(this.#actions && res.code in this.#actions && typeof this.#actions[res.code] === "function"){
           try {
             console.debug(`[응답 코드에 의한 분기]: 코드 [${res.code}]가 발생하여, 정의된 Action을 호출합니다.`);
@@ -95,17 +134,6 @@ export class RequestInstance {
       return Promise.reject(e);
     }
   }
-
-  // 기대되는 응답 값이 없는 경우에 사용하는 api 트리거
-  async execute(): Promise<void> {
-    await this.request();
-  }
-  
-  // 응답 값이 있는 경우에 사용하는 api 트리거(응답 객체 타입을 제네릭으로 필수 지정해주어야함.)
-  async fetch<T>(): Promise<T> {
-    return await this.request<T>();
-  }
-
 
 
 }

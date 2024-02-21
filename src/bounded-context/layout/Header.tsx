@@ -1,10 +1,12 @@
 'use client';
-import { ThemeSwitcher } from "@/libs/theme/ThemeSwitcher";
+import { ThemeSwitcher } from "@/global/theme/ThemeSwitcher";
 import UserWidget from "../user/widget/UserWidget";
 import { PencilLine } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Entrypoint from "../user/entrypoint/Entrypoint";
+import { useContext, useEffect, useState } from "react";
+import { SessionContext } from "@/app/GlobalProviders";
 
 
 
@@ -13,22 +15,23 @@ import Entrypoint from "../user/entrypoint/Entrypoint";
 
 export default function Header(){
 
+  const { sessionManager } = useContext(SessionContext);
+  const [isAuthenticated, setIsAuthenticated] = useState(sessionManager.getSession().isAuthenticated);
 
-  const session = {
-    authenticated: false
-  }
+  useEffect(() => {
 
+  }, []);
   
   return (
     <header className="flex justify-between items-center container mt-5">
       <Title />
       <div className="flex items-center">
-        {session.authenticated && 
+        {isAuthenticated ?
         // 로그인
         <>
           <WriteLinkBtn />
           <UserWidget className="mx-2" />
-        </> ||
+        </> :
         // 비회원
         <>
           <Entrypoint className="mx-2" />

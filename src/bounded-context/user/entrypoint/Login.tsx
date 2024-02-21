@@ -21,8 +21,8 @@ import { Input } from "@/components/ui/input"
 import { SessionContext } from "@/app/GlobalProviders";
 import { useContext } from "react";
 import { zodUserSchemata } from "@/constants/zod/UserSchemata";
-import { AccessTokenDto } from "../session/AccessTokenStorage";
-import { ApiFactory } from "@/apis/ApiFactory";
+import { AccessToken } from "../../../api/AccessTokenStorage";
+import { DefaultAxiosFactory } from "@/api/AnonymousApi";
 
 
 export default function LoginTrigger({className}: {className?: string}){
@@ -40,7 +40,6 @@ export default function LoginTrigger({className}: {className?: string}){
   </div>
   )
 }
-
 
 function LoginDialogForm(){
 
@@ -61,13 +60,17 @@ function LoginDialogForm(){
 
     async function onSubmit(UnAndPw: z.infer<typeof loginFormSchema>) {
       //TODO: api에서 데이터 타입만 제네릭으로 전달하면, 알아서 객체를 처리해서 타입에 맞게 반환해주는 중앙화 로직 구현하기
-      const accessToken: AccessTokenDto = await 
-      ApiFactory.anonymousPost("/login")
+      const { accessToken, user } = await DefaultAxiosFactory.anonymousPost("/login")
       .data(UnAndPw)
-      .fetch<AccessTokenDto>();
+      .fetch<{
+        accessToken: AccessToken; 
+        user: UserSession;
+      }>();
 
       // 토큰 저장
       sessionManager.storeToken(accessToken);
+      // 세션 저장
+      sessionManager.setSession(user);
     }
 
 

@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input"
 import { SessionContext } from "@/app/GlobalProviders";
 import { useContext } from "react";
 import { zodUserSchemata } from "@/constants/zod/UserSchemata";
-import { ApiFactory } from "@/apis/ApiFactory";
+import { DefaultAxiosFactory } from "@/api/AnonymousApi";
 
 
 
@@ -91,7 +91,7 @@ function SignupDialogForm(){
     }
 
     // 회원가입 요청 전송
-    ApiFactory.anonymousPost("/signup")
+    DefaultAxiosFactory.anonymousPost("/signup")
     .data(signupForm)
     .execute();
   }
