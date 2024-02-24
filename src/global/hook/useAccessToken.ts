@@ -17,7 +17,7 @@ const useAccessTokenStore = create<AccessTokenStore>((set, get) => ({
 }));
 
 export const useAccessToken = () => {
-  const { deAuthenticate } = useAuth(); // 인증상태 참조
+  const { deAuthenticate, isAuthenticated } = useAuth(); // 인증상태 참조
   const { storage } = useAccessTokenStore(); // 저장소 참조
 
   const storeToken = (token: AccessToken) => {
@@ -30,11 +30,9 @@ export const useAccessToken = () => {
 
 
   const ensureToken: () => Promise<string> = async () => {
-    // 동기적 방식으로 상태 참조
-    const syncIsAuthenticated = useAuth.getState().isAuthenticated;
 
     // [0]: root 인증상태 확인후, 익명이라면 에러
-    if(!syncIsAuthenticated){
+    if(!isAuthenticated()){ // 동기적 참조
       throw new Error("인증되지 않은 사용자는 'ensureToken()'으로 토큰을 가져올 수 없습니다.");
     }
     
@@ -53,7 +51,7 @@ export const useAccessToken = () => {
      * 토큰 없음 -> isAuthentication이 true라면, refresh 요청을 보냄
      */
     } else {
-      if(syncIsAuthenticated){
+      if(isAuthenticated()){
         isRefreshRequired = true;
       }
     }

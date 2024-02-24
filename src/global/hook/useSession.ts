@@ -42,7 +42,7 @@ export const useSession: () => UseSessionResult = () => {
   // [1]: react-query로 세션정보를 가져오고 캐싱
   const queryFn = () => api.get("/user/session").actions({}).fetch<ServerSession>();
   const options = {
-    enabled: isAuthenticated, // 인증된 사용자만 세션 정보를 가져옴
+    enabled: isAuthenticated(), // 인증된 사용자만 세션 정보를 가져옴
   }
   // useQuery를 사용하여 세션 정보를 가져오고 캐싱후 반환
   const useQueryResult = useQuery<ServerSession>(QueryKeys.user.session, queryFn, options);

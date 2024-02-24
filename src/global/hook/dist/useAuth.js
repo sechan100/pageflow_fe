@@ -4,7 +4,7 @@ exports.__esModule = true;
 exports.useAuth = exports.SESSION_FLAG_NAME = void 0;
 var zustand_1 = require("zustand");
 exports.SESSION_FLAG_NAME = "_pageflowSessionExpiredAt";
-function isAuthenticated() {
+function getAuthStateFromLocalStorage() {
     var isAuthenticated = continueIfOnServer(function () {
         var sessionFlag = getLocalStorage().getItem(exports.SESSION_FLAG_NAME);
         // [1]: 세션지표가 존재하지 않는 경우 -> refreshToken 쿠키는 존재할 수도 있지만, 모르겠고 그냥 세션 없는걸로 간주
@@ -40,13 +40,16 @@ function continueIfOnServer(callback) {
     }
 }
 exports.useAuth = zustand_1.create(function (set, get) { return ({
-    isAuthenticated: isAuthenticated(),
+    isAuthenticated: function () {
+        return get().rootAuth;
+    },
     authenticate: function () {
         authenticate();
-        set({ isAuthenticated: true });
+        set({ rootAuth: true });
     },
     deAuthenticate: function () {
         deAuthenticate();
-        set({ isAuthenticated: false });
-    }
+        set({ rootAuth: false });
+    },
+    rootAuth: getAuthStateFromLocalStorage()
 }); });

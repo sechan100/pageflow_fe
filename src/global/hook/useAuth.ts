@@ -4,7 +4,7 @@ import { triggerToast } from "../toast/ToastProvider";
 
 export const SESSION_FLAG_NAME = "_pageflowSessionExpiredAt" as const;
 
-function isAuthenticated(){
+function getAuthStateFromLocalStorage(){
   const isAuthenticated = continueIfOnServer(() => {
     const sessionFlag = getLocalStorage().getItem(SESSION_FLAG_NAME);
 
@@ -48,21 +48,26 @@ function continueIfOnServer(callback: any){
 }
 
 export interface RootAuth {
-  isAuthenticated: boolean;
+  isAuthenticated: () => boolean; // root 인증상태를 동기적으로 반환하기위해 함수로 정의함
   authenticate: () => void;
   deAuthenticate: () => void;
+  rootAuth: boolean;
 }
 
 export const useAuth = create<RootAuth>((set, get) => ({
-  isAuthenticated: isAuthenticated(),
+  isAuthenticated: () => {
+    return get().rootAuth;
+  },
 
   authenticate: () => {
     authenticate();
-    set({ isAuthenticated: true });
+    set({ rootAuth: true });
   },
 
   deAuthenticate: () => {
     deAuthenticate();
-    set({ isAuthenticated: false });
-  }
+    set({ rootAuth: false });
+  },
+
+  rootAuth: getAuthStateFromLocalStorage()
 }));
