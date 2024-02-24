@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import Header from "./Header";
+import Header from "../global/components/Header";
+import React from "react";
+import GlobalProviders from "../global/provider/GlobalProviders";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,15 +17,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
   return (
-    <html lang="ko">
+    <html 
+      suppressHydrationWarning={true} // 서버와 클라 렌더링 간의 불일치 경고를 무시.(간혹 일치시키는 것이 매우 어렵거나 불가능함)
+      lang="ko"
+      >
+      <head />
       <body className={inter.className}>
-        <div className="container my-5">
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <Header />
+        <GlobalProviders>
+          <Header />
+          <div className="container">
             {children}
-          </ThemeProvider>
-        </div>
+          </div>
+        </GlobalProviders>
       </body>
     </html>
   );

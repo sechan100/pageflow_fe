@@ -3,7 +3,7 @@
 import React, { use, useEffect, useState } from "react"
 import * as SwitchPrimitives from "@radix-ui/react-switch"
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/libs/utils"
 import { Moon, Sun } from "lucide-react"
 import '../../styles/utils.css'
 import { useTheme } from "next-themes"
