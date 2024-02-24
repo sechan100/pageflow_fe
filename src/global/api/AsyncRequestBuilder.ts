@@ -144,9 +144,14 @@ export class AsyncRequestBuilder {
         } catch(e: any) {
           throw new Error(`[CodeAction Error]: [${res.apiCode}]으로 정의된 CodeAction 호출중 에러가 발생했습니다. \n Callback Actions 에러: ${e.message}`);
         }
-      // 정의된 actions가 없거나, actions에서 해당 코드에 대한 핸들러를 찾을 수 없는 경우
+      /**
+       * apiCode가 'SUCCESS'가 아님에도
+       * 정의된 actions가 없거나, actions에서 해당 코드에 대한 핸들러를 찾을 수 없는 경우
+       */
       } else {
-        throw new Error(`[CodeAction never defined]: [${res.apiCode}]("${res.message}") 코드에 대한 CodeAction이 정의되지 않았습니다. `);
+        if(res.apiCode !== ApiCode.common.SUCCESS){
+          throw new Error(`[CodeAction never defined]: [${res.apiCode}]("${res.message}") 코드에 대한 CodeAction이 정의되지 않았습니다. `);
+        }
       }
       
       // ApiCode가 성공하지 못했다면 Promise를 reject
@@ -157,8 +162,10 @@ export class AsyncRequestBuilder {
         return res.data;
       }
     } catch(e: any){
-
-      console.error(requestInfo + `\n[Error]: ${e.message}`)
+      
+      if(!(e instanceof RejectedForCodeActionCall)){
+        console.error(requestInfo + `\n[Error]: ${e.message}`)
+      }
 
       triggerToast({
         variant: "destructive",

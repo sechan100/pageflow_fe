@@ -21,9 +21,10 @@ import { Input } from "@/components/ui/input"
 import { zodUserSchemata } from "@/bounded-context/user/constants/zod/UserSchemata";
 import { AccessToken } from "../../service/AccessTokenStorage";
 import { useApi } from "@/global/hook/useApi";
-import { useAuth } from "@/global/hook/useAuth";
+import { useAccessToken } from "@/global/hook/useAccessToken";
 import { triggerToast } from "@/global/toast/ToastProvider";
-import { useRootAuth } from "@/global/hook/useRootAuth";
+import { useAuth } from "@/global/hook/useAuth";
+import { useSession } from "@/global/hook/useSession";
 
 
 export default function LoginTrigger({className}: {className?: string}){
@@ -44,9 +45,7 @@ export default function LoginTrigger({className}: {className?: string}){
 
 function LoginDialogForm(){
 
-  const { api } = useApi();
-  const { storeToken } = useAuth();
-  const { login } = useRootAuth();
+  const { login } = useSession();
   
   const loginFormSchema = z.object({
     username: zodUserSchemata.username,
@@ -60,26 +59,15 @@ function LoginDialogForm(){
       password: "testuser1",
     },
   })
-  
-  async function onSubmit(UnAndPw: z.infer<typeof loginFormSchema>) {
-    //TODO: api에서 데이터 타입만 제네릭으로 전달하면, 알아서 객체를 처리해서 타입에 맞게 반환해주는 중앙화 로직 구현하기
-    const accessToken = await api
-                              .anonymous()
-                              .post("/login")
-                              .actions({
-                                USER_NOT_FOUND
-                              })
-                              .data(UnAndPw)
-                              .fetch<AccessToken>();
-    // 토큰 저장
-    storeToken(accessToken);
-    login();
-  }
 
 
   return (
     <Form {...loginForm}>
-      <form id="login_form" onSubmit={loginForm.handleSubmit(onSubmit)} className="space-y-2">
+      <form id="login_form" onSubmit={loginForm.handleSubmit(
+        ({username, password}) => {
+          login(username, password);
+        }
+      )} className="space-y-2">
 
         {/* username 필드 */}
         <FormField
@@ -114,17 +102,4 @@ function LoginDialogForm(){
       <Button form="login_form" type="submit" className="rounded-full">로그인</Button>
     </Form>
   )
-}
-
-
-
-
-function USER_NOT_FOUND(){
-  triggerToast({
-    title: "존재하지 않는 사용자입니다.",
-    action: {
-      description: "회원가입하러 가기",
-      onClick: () => {console.log("회원가입 페이지로 이동합니다.")}
-    },
-  })
 }

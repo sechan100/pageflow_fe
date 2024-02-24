@@ -1,12 +1,12 @@
 'use client';
 import { ThemeSwitcher } from "@/global/theme/ThemeSwitcher";
-import UserWidget from "../../bounded-context/user/widget/UserWidget";
+import UserWidget from "../../bounded-context/user/components/loginUserMenu/UserWidget";
 import { PencilLine } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Entrypoint from "../../bounded-context/user/components/entrypoint/Entrypoint";
-import { useSession } from "@/bounded-context/user/hook/useSession";
-import { useRootAuth } from "../hook/useRootAuth";
+import { useSession } from "@/global/hook/useSession";
+import { useAuth } from "../hook/useAuth";
 
 
 

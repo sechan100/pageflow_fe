@@ -2,12 +2,12 @@
 "use strict";
 exports.__esModule = true;
 var ThemeSwitcher_1 = require("@/global/theme/ThemeSwitcher");
-var UserWidget_1 = require("../../bounded-context/user/widget/UserWidget");
+var UserWidget_1 = require("../../bounded-context/user/components/loginUserMenu/UserWidget");
 var lucide_react_1 = require("lucide-react");
 var link_1 = require("next/link");
 var button_1 = require("@/components/ui/button");
 var Entrypoint_1 = require("../../bounded-context/user/components/entrypoint/Entrypoint");
-var useSession_1 = require("@/bounded-context/user/hook/useSession");
+var useSession_1 = require("@/global/hook/useSession");
 function Header() {
     var session = useSession_1.useSession().session;
     return (React.createElement("header", { className: "flex justify-between items-center container mt-5" },

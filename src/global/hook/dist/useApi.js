@@ -40,21 +40,17 @@ exports.useApi = void 0;
 var zustand_1 = require("zustand");
 var DefaultAxiosFactory_1 = require("../api/DefaultAxiosFactory");
 var AsyncRequestBuilder_1 = require("../api/AsyncRequestBuilder");
-var react_1 = require("react");
-var ApiCode_1 = require("@/global/api/ApiCode");
-var useAuth_1 = require("./useAuth");
+var useAccessToken_1 = require("./useAccessToken");
 var BEARER = "Bearer ";
 var axiosStore = zustand_1.create(function (set) { return ({
     axios: null
 }); });
 exports.useApi = function () {
-    var _a = react_1.useState(ApiCode_1.ApiCode.clientOnly.LOADING), apiCode = _a[0], setApiCode = _a[1];
-    var ensureToken = useAuth_1.useAuth().ensureToken;
+    var ensureToken = useAccessToken_1.useAccessToken().ensureToken;
     var axios = axiosStore().axios;
     if (axios) {
         return {
-            api: new AsyncRequestBuilder_1.AsyncRequestBuilder(axios, setApiCode),
-            apiCode: apiCode
+            api: new AsyncRequestBuilder_1.AsyncRequestBuilder(axios)
         };
     }
     // 기본 요청 객체에 interceptor를 추가하기 위해, 새로운 요청체를 생성
@@ -87,7 +83,6 @@ exports.useApi = function () {
     newAxios.interceptors.request.use(interceptorCallBack, interceptorErrorCallback);
     axiosStore.setState({ axios: newAxios });
     return {
-        api: new AsyncRequestBuilder_1.AsyncRequestBuilder(newAxios, setApiCode),
-        apiCode: apiCode
+        api: new AsyncRequestBuilder_1.AsyncRequestBuilder(newAxios)
     };
 };

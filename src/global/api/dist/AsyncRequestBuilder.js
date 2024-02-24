@@ -59,7 +59,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     }
     return privateMap.get(receiver);
 };
-var _axios, _config, _actions, _setApiCode, _auth;
+var _axios, _config, _actions, _auth;
 exports.__esModule = true;
 exports.AsyncRequestBuilder = exports.RejectedForCodeActionCall = void 0;
 var ApiCode_1 = require("@/global/api/ApiCode");
@@ -74,17 +74,14 @@ var RejectedForCodeActionCall = /** @class */ (function () {
 }());
 exports.RejectedForCodeActionCall = RejectedForCodeActionCall;
 var AsyncRequestBuilder = /** @class */ (function () {
-    function AsyncRequestBuilder(axios, setApiCodeOrNull) {
+    function AsyncRequestBuilder(axios) {
         _axios.set(this, void 0);
         _config.set(this, void 0);
         _actions.set(this, void 0);
-        // 외부에 code의 상태를 알릴 수 있는 Dispatch
-        _setApiCode.set(this, void 0);
         _auth.set(this, void 0);
         __classPrivateFieldSet(this, _axios, axios);
         __classPrivateFieldSet(this, _config, {});
         __classPrivateFieldSet(this, _actions, {});
-        __classPrivateFieldSet(this, _setApiCode, setApiCodeOrNull);
         __classPrivateFieldSet(this, _auth, true); // 기본값은 Authorization 헤더를 포함하는 요청임.
     }
     // =========== GET, POST, PUT, DELETE =================
@@ -164,27 +161,29 @@ var AsyncRequestBuilder = /** @class */ (function () {
                         endTime = performance.now();
                         timeTaken = endTime - startTime;
                         console.debug(requestInfo + ("\n[ApiCode]: " + res.apiCode + "(" + res.message + ")\n[delay]: " + timeTaken + "ms"));
-                        // setCode가 존재한다면 상태를 업데이트.(default value: LOADING)
-                        if (__classPrivateFieldGet(this, _setApiCode)) {
-                            __classPrivateFieldGet(this, _setApiCode).call(this, res.apiCode);
-                        }
-                        // 성공하지 못했다면 Actions에서 코드에 따른 핸들러를 호출
-                        if (res.apiCode !== ApiCode_1.ApiCode.common.SUCCESS) {
-                            if (__classPrivateFieldGet(this, _actions) && res.apiCode in __classPrivateFieldGet(this, _actions) && typeof __classPrivateFieldGet(this, _actions)[res.apiCode] === "function") {
-                                try {
-                                    console.debug("[AsyncRequestBuilder]: apiCode [" + res.apiCode + "]\uB85C \uC815\uC758\uB41C Action\uC744 \uD638\uCD9C\uD569\uB2C8\uB2E4.");
-                                    __classPrivateFieldGet(this, _actions)[res.apiCode](res.data);
-                                    return [2 /*return*/, Promise.reject(new RejectedForCodeActionCall(res.apiCode, res.message))];
-                                    // action 내부에서 에러가 발생한 경우
-                                }
-                                catch (e) {
-                                    throw new Error("[CodeAction Error]: [" + res.apiCode + "]\uC73C\uB85C \uC815\uC758\uB41C CodeAction \uD638\uCD9C\uC911 \uC5D0\uB7EC\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4. \n Callback Actions \uC5D0\uB7EC: " + e.message);
-                                }
-                                // 정의된 actions가 없거나, actions에서 해당 코드에 대한 핸들러를 찾을 수 없는 경우
+                        // 정의된 Actions가 존재한다면 콜백을 호출
+                        if (__classPrivateFieldGet(this, _actions) && res.apiCode in __classPrivateFieldGet(this, _actions) && typeof __classPrivateFieldGet(this, _actions)[res.apiCode] === "function") {
+                            try {
+                                console.debug("[AsyncRequestBuilder]: apiCode [" + res.apiCode + "]\uB85C \uC815\uC758\uB41C Action\uC744 \uD638\uCD9C\uD569\uB2C8\uB2E4.");
+                                __classPrivateFieldGet(this, _actions)[res.apiCode](res.data);
+                                // action 내부에서 에러가 발생한 경우
                             }
-                            else {
+                            catch (e) {
+                                throw new Error("[CodeAction Error]: [" + res.apiCode + "]\uC73C\uB85C \uC815\uC758\uB41C CodeAction \uD638\uCD9C\uC911 \uC5D0\uB7EC\uAC00 \uBC1C\uC0DD\uD588\uC2B5\uB2C8\uB2E4. \n Callback Actions \uC5D0\uB7EC: " + e.message);
+                            }
+                            /**
+                             * apiCode가 'SUCCESS'가 아님에도
+                             * 정의된 actions가 없거나, actions에서 해당 코드에 대한 핸들러를 찾을 수 없는 경우
+                             */
+                        }
+                        else {
+                            if (res.apiCode !== ApiCode_1.ApiCode.common.SUCCESS) {
                                 throw new Error("[CodeAction never defined]: [" + res.apiCode + "](\"" + res.message + "\") \uCF54\uB4DC\uC5D0 \uB300\uD55C CodeAction\uC774 \uC815\uC758\uB418\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4. ");
                             }
+                        }
+                        // ApiCode가 성공하지 못했다면 Promise를 reject
+                        if (res.apiCode !== ApiCode_1.ApiCode.common.SUCCESS) {
+                            return [2 /*return*/, Promise.reject(new RejectedForCodeActionCall(res.apiCode, res.message))];
                             // 성공했다면, 데이터를 반환
                         }
                         else {
@@ -193,7 +192,9 @@ var AsyncRequestBuilder = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 3:
                         e_1 = _a.sent();
-                        console.error(requestInfo + ("\n[Error]: " + e_1.message));
+                        if (!(e_1 instanceof RejectedForCodeActionCall)) {
+                            console.error(requestInfo + ("\n[Error]: " + e_1.message));
+                        }
                         ToastProvider_1.triggerToast({
                             variant: "destructive",
                             title: "요청 실패",
@@ -208,4 +209,4 @@ var AsyncRequestBuilder = /** @class */ (function () {
     return AsyncRequestBuilder;
 }());
 exports.AsyncRequestBuilder = AsyncRequestBuilder;
-_axios = new WeakMap(), _config = new WeakMap(), _actions = new WeakMap(), _setApiCode = new WeakMap(), _auth = new WeakMap();
+_axios = new WeakMap(), _config = new WeakMap(), _actions = new WeakMap(), _auth = new WeakMap();

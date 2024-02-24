@@ -4,7 +4,7 @@ import { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { AsyncRequestBuilder } from "../api/AsyncRequestBuilder";
 import { useState } from "react";
 import { ApiCode, ApiCodeType } from "@/global/api/ApiCode";
-import { useAuth } from "./useAuth";
+import { useAccessToken } from "./useAccessToken";
 
 
 const BEARER = "Bearer ";
@@ -16,14 +16,12 @@ const axiosStore = create<{ axios: AxiosInstance | null; }>((set) => ({
 
 
 export const useApi = () => {
-  const [apiCode, setApiCode] = useState<ApiCodeType>(ApiCode.clientOnly.LOADING);
-  const { ensureToken } = useAuth();
+  const { ensureToken } = useAccessToken();
   const { axios } = axiosStore();
 
   if(axios) {
     return {
-      api: new AsyncRequestBuilder(axios, setApiCode),
-      apiCode
+      api: new AsyncRequestBuilder(axios),
     }
   }
 
@@ -52,7 +50,6 @@ export const useApi = () => {
   axiosStore.setState({ axios: newAxios });
 
   return {
-    api: new AsyncRequestBuilder(newAxios, setApiCode),
-    apiCode
+    api: new AsyncRequestBuilder(newAxios),
   }
 }
