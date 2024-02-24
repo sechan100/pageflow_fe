@@ -1,9 +1,9 @@
-import { GlobalResponse } from "@/global/api/AsyncRequestBuilder";
-import { ApiCode } from "@/global/api/ApiCode";
+import { ApiCode, ApiCodeType } from "@/global/api/ApiCode";
 import { triggerToast } from "@/global/toast/ToastProvider";
-import { AxiosInstance, AxiosRequestConfig, Method } from "axios";
+import { AxiosInstance, AxiosRequestConfig } from "axios";
+import { time, timeEnd } from "console";
 import { Dispatch, SetStateAction } from "react";
-
+import { debug } from "util";
 
 
 // 응답 코드에 따라서 실행할 핸들러들의 참조들을 정의
@@ -21,22 +21,32 @@ export class RejectedForCodeActionCall {
   }
 }
 
+export interface GlobalResponse<T> {
+  apiCode: ApiCodeType;
+  data: T;
+  message: string;
+}
 
 
-export class AsyncApiBuilder {
+export class AsyncRequestBuilder {
 
   #axios: AxiosInstance;
   #config: AxiosRequestConfig;
   #actions: CodeActions;
-  #setCode: Dispatch<SetStateAction<string>>;
+  // 외부에 code의 상태를 알릴 수 있는 Dispatch
+  #setApiCode: Dispatch<SetStateAction<ApiCodeType>> | null;
+  #auth: boolean;
 
-  constructor(axios: AxiosInstance, setCode: Dispatch<SetStateAction<string>>){
+  constructor(axios: AxiosInstance, setApiCodeOrNull: Dispatch<SetStateAction<ApiCodeType>> | null){
     this.#axios = axios;
     this.#config = {};
     this.#actions = {};
-    this.#setCode = setCode;
+    this.#setApiCode = setApiCodeOrNull;
+    this.#auth = true; // 기본값은 Authorization 헤더를 포함하는 요청임.
   }
 
+
+  // =========== GET, POST, PUT, DELETE =================
   get(url: string){
     this.#config.method = "GET";
     this.#config.url = url;
@@ -57,7 +67,9 @@ export class AsyncApiBuilder {
     this.#config.url = url;
     return this;
   }
+// =======================================================
 
+// 설정 메소드들
 
   // Response Code별 처리 핸들러 정의서
   actions(actions: CodeActions){
@@ -91,6 +103,11 @@ export class AsyncApiBuilder {
     return this;
   }
 
+  // AccessToken 포함 여부
+  anonymous(){
+    this.#auth = false;
+    return this;
+  }
 
   /*
    * 서버의 응답 코드에 따라서 SUCCESS 코드인 경우 응답된 데이터를 반환하고, 
@@ -98,35 +115,63 @@ export class AsyncApiBuilder {
    * 만약 actions에 해당 코드에 대한 핸들러가 정의되지 않은 경우, 에러를 발생시킨다.
    */
   async fetch<T>(): Promise<T> {
+
+    // axios 인터셉터의 로직을 on/off하는 플래그 헤더
+    this.#config.headers = {
+      ...this.#config.headers,
+      "Pageflow-Auth": this.#auth
+    };
+    const requestInfo = 
+    `============[ Server Request ]============
+    URL: ${this.#config.url}
+    METHOD: ${this.#config.method}
+    DATA: ${JSON.stringify(this.#config.data)}
+    AUTHORIZATION: ${this.#auth}`;
+
     try {
+      const startTime = performance.now();
+      // 요청 시작
       const axiosRes = await this.#axios.request<T>(this.#config);
       const res = axiosRes.data as GlobalResponse<T>;
+      // 요청 끝
+      const endTime = performance.now();
+      const timeTaken = endTime - startTime;
+      console.debug(requestInfo + `\n[ApiCode]: ${res.apiCode}(${res.message})\n[delay]: ${timeTaken}ms`)
 
-      // useApi 훅으로 반환한 code값의 상태를 업데이트.(default value: LOADING)
-      this.#setCode(res.code);
+
+
+      // setCode가 존재한다면 상태를 업데이트.(default value: LOADING)
+      if(this.#setApiCode){
+        this.#setApiCode(res.apiCode);
+      }
       
       // 성공하지 못했다면 Actions에서 코드에 따른 핸들러를 호출
-      if(res.code !== ApiCode.common.SUCCESS){
-        if(this.#actions && res.code in this.#actions && typeof this.#actions[res.code] === "function"){
+      if(res.apiCode !== ApiCode.common.SUCCESS){
+        if(this.#actions && res.apiCode in this.#actions && typeof this.#actions[res.apiCode] === "function"){
           try {
-            console.debug(`[응답 코드에 의한 분기]: 코드 [${res.code}]가 발생하여, 정의된 Action을 호출합니다.`);
-            this.#actions[res.code](res.data);
-            return Promise.reject(new RejectedForCodeActionCall(res.code, res.message));
+
+            console.debug(`[AsyncRequestBuilder]: apiCode [${res.apiCode}]로 정의된 Action을 호출합니다.`);
+
+            this.#actions[res.apiCode](res.data);
+            return Promise.reject(new RejectedForCodeActionCall(res.apiCode, res.message));
   
           // action 내부에서 에러가 발생한 경우
           } catch(e: any) {
-            throw new Error(`[CodeAction Error]: [${res.code}]으로 정의된 CodeAction 호출중 에러가 발생했습니다. \n Callback Actions 에러: ${e.message}`);
+            throw new Error(`[CodeAction Error]: [${res.apiCode}]으로 정의된 CodeAction 호출중 에러가 발생했습니다. \n Callback Actions 에러: ${e.message}`);
           }
           
         // 정의된 actions가 없거나, actions에서 해당 코드에 대한 핸들러를 찾을 수 없는 경우
         } else {
-          throw new Error(`[CodeAction never defined]: [${res.code}]("${res.message}") 코드에 대한 CodeAction이 정의되지 않았습니다. `);
+          throw new Error(`[CodeAction never defined]: [${res.apiCode}]("${res.message}") 코드에 대한 CodeAction이 정의되지 않았습니다. `);
         }
       // 성공했다면, 데이터를 반환
       } else {
         return res.data;
       }
     } catch(e: any){
+
+      console.error(requestInfo + `\n[Error]: ${e.message}`)
+
       triggerToast({
         variant: "destructive",
         title: "요청 실패",

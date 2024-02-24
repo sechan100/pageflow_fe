@@ -6,7 +6,7 @@ import EventEmitter from "@/libs/event/EventEmitter";
 
 
 
-interface ToastContext {
+export interface ToastContext {
   variant?: "default" | "destructive";
   title: string;
   description?: string;
