@@ -33,15 +33,12 @@ export class AsyncRequestBuilder {
   #axios: AxiosInstance;
   #config: AxiosRequestConfig;
   #actions: CodeActions;
-  // 외부에 code의 상태를 알릴 수 있는 Dispatch
-  #setApiCode: Dispatch<SetStateAction<ApiCodeType>> | null;
   #auth: boolean;
 
-  constructor(axios: AxiosInstance, setApiCodeOrNull: Dispatch<SetStateAction<ApiCodeType>> | null){
+  constructor(axios: AxiosInstance){
     this.#axios = axios;
     this.#config = {};
     this.#actions = {};
-    this.#setApiCode = setApiCodeOrNull;
     this.#auth = true; // 기본값은 Authorization 헤더를 포함하는 요청임.
   }
 
@@ -138,32 +135,23 @@ export class AsyncRequestBuilder {
       const timeTaken = endTime - startTime;
       console.debug(requestInfo + `\n[ApiCode]: ${res.apiCode}(${res.message})\n[delay]: ${timeTaken}ms`)
 
-
-
-      // setCode가 존재한다면 상태를 업데이트.(default value: LOADING)
-      if(this.#setApiCode){
-        this.#setApiCode(res.apiCode);
+      // 정의된 Actions가 존재한다면 콜백을 호출
+      if(this.#actions && res.apiCode in this.#actions && typeof this.#actions[res.apiCode] === "function"){
+        try {
+          console.debug(`[AsyncRequestBuilder]: apiCode [${res.apiCode}]로 정의된 Action을 호출합니다.`);
+          this.#actions[res.apiCode](res.data);
+        // action 내부에서 에러가 발생한 경우
+        } catch(e: any) {
+          throw new Error(`[CodeAction Error]: [${res.apiCode}]으로 정의된 CodeAction 호출중 에러가 발생했습니다. \n Callback Actions 에러: ${e.message}`);
+        }
+      // 정의된 actions가 없거나, actions에서 해당 코드에 대한 핸들러를 찾을 수 없는 경우
+      } else {
+        throw new Error(`[CodeAction never defined]: [${res.apiCode}]("${res.message}") 코드에 대한 CodeAction이 정의되지 않았습니다. `);
       }
       
-      // 성공하지 못했다면 Actions에서 코드에 따른 핸들러를 호출
+      // ApiCode가 성공하지 못했다면 Promise를 reject
       if(res.apiCode !== ApiCode.common.SUCCESS){
-        if(this.#actions && res.apiCode in this.#actions && typeof this.#actions[res.apiCode] === "function"){
-          try {
-
-            console.debug(`[AsyncRequestBuilder]: apiCode [${res.apiCode}]로 정의된 Action을 호출합니다.`);
-
-            this.#actions[res.apiCode](res.data);
-            return Promise.reject(new RejectedForCodeActionCall(res.apiCode, res.message));
-  
-          // action 내부에서 에러가 발생한 경우
-          } catch(e: any) {
-            throw new Error(`[CodeAction Error]: [${res.apiCode}]으로 정의된 CodeAction 호출중 에러가 발생했습니다. \n Callback Actions 에러: ${e.message}`);
-          }
-          
-        // 정의된 actions가 없거나, actions에서 해당 코드에 대한 핸들러를 찾을 수 없는 경우
-        } else {
-          throw new Error(`[CodeAction never defined]: [${res.apiCode}]("${res.message}") 코드에 대한 CodeAction이 정의되지 않았습니다. `);
-        }
+        return Promise.reject(new RejectedForCodeActionCall(res.apiCode, res.message));
       // 성공했다면, 데이터를 반환
       } else {
         return res.data;
