@@ -5,6 +5,8 @@ import { useAuth } from "./useAuth";
 import { useAccessToken } from "@/global/hook/useAccessToken";
 import { AccessToken } from "@/bounded-context/user/service/AccessTokenStorage";
 import { triggerToast } from "../toast/ToastProvider";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useRouting } from "./useRouting";
 
 
 // 세션에 포함되는 사용자 정보 타입
@@ -29,7 +31,8 @@ export interface ClientSession {
 
 interface UseSessionResult{
   session: ClientSession;
-  login: (username: string, password: string) => void;
+  formLogin: (username: string, password: string) => void;
+  oauth2Login: (url: string) => void;
   logout: () => void;
 }
 
@@ -38,6 +41,7 @@ export const useSession: () => UseSessionResult = () => {
   const { api } = useApi();
   const { isAuthenticated, authenticate, deAuthenticate } = useAuth();
   const { storeToken, clearToken } = useAccessToken();
+  const { router } = useRouting();
 
   // [1]: react-query로 세션정보를 가져오고 캐싱
   const queryFn = () => api.get("/user/session").actions({}).fetch<ServerSession>();
@@ -50,8 +54,8 @@ export const useSession: () => UseSessionResult = () => {
   const session = useQueryResult.data ? convertToClient(useQueryResult.data) : anonymousSession();
 
 
-  // [2]: login 로직 생성
-  const login = async (username: string, password: string) => {
+  // [2]: formLogin 로직 생성
+  const formLogin = async (username: string, password: string) => {
     const accessToken = await api
         .anonymous()
         .post("/user/login")
@@ -67,8 +71,24 @@ export const useSession: () => UseSessionResult = () => {
     storeToken(accessToken);
   }
 
+  // [3]: oauth2Login 로직 생성
+  const oauth2Login = async (url: string) => {
+    const accessToken = await api
+        .anonymous()
+        .get(url)
+        .actions({
+          OAUTH2_SIGNUP_REQUIRED,
+        })
+        .fetch<AccessToken>();
+        
+    // root 인증상태를 설정
+    authenticate();
+    // 토큰 저장
+    storeToken(accessToken);
+  }
 
-  // [3]: logout 로직 생성
+
+  // [4]: logout 로직 생성
   const logout = async () => {
     // 서버에 로그아웃 요청을 전송 -> 서버에서 RefreshToken을 제거하고, refreshTokenUUID 쿠키를 제거.
     await api.post("/user/logout").actions({SUCCESS: logoutSuccess}).fetch<void>();
@@ -84,10 +104,24 @@ export const useSession: () => UseSessionResult = () => {
   }
 
 
+  function USER_NOT_FOUND(){
+    triggerToast({
+      title: "존재하지 않는 사용자입니다.",
+      action: {
+        description: "회원가입하러 가기",
+        onClick: () => {console.log("회원가입 페이지로 이동합니다.")}
+      },
+    })
+  }
+
+  function OAUTH2_SIGNUP_REQUIRED(userData: any){
+    router.push("/user/signup/oauth2", userData);
+  }
 
   return {
     session,
-    login,
+    formLogin,
+    oauth2Login,
     logout,
   }
 }
@@ -104,14 +138,4 @@ const anonymousSession = (): ClientSession => {
     isAuthenticated: false,
     user: null,
   }
-}
-
-function USER_NOT_FOUND(){
-  triggerToast({
-    title: "존재하지 않는 사용자입니다.",
-    action: {
-      description: "회원가입하러 가기",
-      onClick: () => {console.log("회원가입 페이지로 이동합니다.")}
-    },
-  })
 }

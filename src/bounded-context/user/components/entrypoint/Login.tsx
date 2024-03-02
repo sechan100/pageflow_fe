@@ -25,6 +25,7 @@ import { useAccessToken } from "@/global/hook/useAccessToken";
 import { triggerToast } from "@/global/toast/ToastProvider";
 import { useAuth } from "@/global/hook/useAuth";
 import { useSession } from "@/global/hook/useSession";
+import OAuth2LoginWidget from "./OAuth2LoginWidget";
 
 
 export default function LoginTrigger({className}: {className?: string}){
@@ -37,6 +38,7 @@ export default function LoginTrigger({className}: {className?: string}){
       {/* Dialog 팝업시에... */}
       <DialogContent>
         <LoginDialogForm />
+        <OAuth2LoginWidget />
       </DialogContent>
     </Dialog>
   </div>
@@ -45,7 +47,7 @@ export default function LoginTrigger({className}: {className?: string}){
 
 function LoginDialogForm(){
 
-  const { login } = useSession();
+  const { formLogin: login } = useSession();
   
   const loginFormSchema = z.object({
     username: zodUserSchemata.username,
@@ -65,6 +67,7 @@ function LoginDialogForm(){
     <Form {...loginForm}>
       <form id="login_form" onSubmit={loginForm.handleSubmit(
         ({username, password}) => {
+          // form 제출 시 로그인 함수 실행
           login(username, password);
         }
       )} className="space-y-2">

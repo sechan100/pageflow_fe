@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodUserSchemata } from "@/bounded-context/user/constants/zod/UserSchemata";
-import { DefaultAxiosFactory } from "@/global/api/DefaultAxiosFactory";
 import { useApi } from "@/global/hook/useApi";
 import { triggerToast } from "@/global/toast/ToastProvider";
 
