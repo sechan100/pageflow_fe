@@ -60,7 +60,7 @@ export const useAccessToken = () => {
     if(isRefreshRequired){
       const request = new AsyncRequestBuilder(DefaultAxiosFactory.createDefaultAxiosInstance());
 
-      const accessToken: AccessToken = await request.post("/user/refresh")
+      const accessToken: AccessToken = await request.post("/refresh")
         .actions({
           TOKEN_NOT_FOUND, // refreshTokenUUID 쿠키가 없는 경우 -> 세션 없음
           SESSION_EXPIRED // refreshTokenUUID 쿠키가 있지만, 만료된 경우 -> 세션 만료

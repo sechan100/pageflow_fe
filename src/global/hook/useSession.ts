@@ -58,7 +58,7 @@ export const useSession: () => UseSessionResult = () => {
   const formLogin = async (username: string, password: string) => {
     const accessToken = await api
         .anonymous()
-        .post("/user/login")
+        .post("/login")
         .actions({
           USER_NOT_FOUND,
         })
@@ -91,7 +91,7 @@ export const useSession: () => UseSessionResult = () => {
   // [4]: logout 로직 생성
   const logout = async () => {
     // 서버에 로그아웃 요청을 전송 -> 서버에서 RefreshToken을 제거하고, refreshTokenUUID 쿠키를 제거.
-    await api.post("/user/logout").actions({SUCCESS: logoutSuccess}).fetch<void>();
+    await api.post("/logout").actions({SUCCESS: logoutSuccess}).fetch<void>();
 
     function logoutSuccess(){
       // [3-1]: root 인증 상태를 제거
@@ -115,7 +115,7 @@ export const useSession: () => UseSessionResult = () => {
   }
 
   function OAUTH2_SIGNUP_REQUIRED(userData: any){
-    router.push("/user/signup/oauth2", userData);
+    router.push("/signup/oauth2", userData);
   }
 
   return {
