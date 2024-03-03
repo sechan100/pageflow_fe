@@ -15,6 +15,9 @@ export interface UserSession{
   email: string;
   username: string;
   penname: string;
+  profileImgUrl: string;
+  role: "ROLE_USER" | "ROLE_MANAGER" |"ROLE_ADMIN";
+  isEmailVerified: boolean;
 }
 
 // 서버 api에서 반환하는 세션 타입
@@ -115,7 +118,7 @@ export const useSession: () => UseSessionResult = () => {
   }
 
   function OAUTH2_SIGNUP_REQUIRED(userData: any){
-    router.push("/signup/oauth2", userData);
+    router.push("/signup/oauth2", {signupCache: userData});
   }
 
   return {

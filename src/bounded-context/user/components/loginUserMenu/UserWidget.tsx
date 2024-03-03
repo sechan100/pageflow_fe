@@ -12,7 +12,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 import { useSession } from "@/global/hook/useSession";
+import clsx from "clsx";
 
 
 
@@ -22,15 +30,23 @@ export default function UserWidget({className} : {className?: string}){
 
   const { session, logout } = useSession();
 
+
+  const { user } = session;
+  if(!user) return (
+    <div className="px-3 text-red-100">
+      세션 정보가 없습니다.
+    </div>
+  );
+
   return (
     <div className={className}>
       <DropdownMenu modal>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-full cursor-pointer" asChild>
             <div className="flex items-center justify-between">
-              <Avatar className="mr-1">
+              <Avatar className="mr-2">
                 <AvatarImage
-                  src="https://avatars.githubusercontent.com/u/4233953?v=4"
+                  src={user.profileImgUrl}
                   alt="profile image"
                 />
                 <AvatarFallback>
@@ -40,12 +56,12 @@ export default function UserWidget({className} : {className?: string}){
                   />
                 </AvatarFallback>
               </Avatar>
-              <span>pageflow 작가님</span>
+              <span>{user.penname} 작가님</span>
             </div>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuLabel>100yearschan@gmail.com</DropdownMenuLabel>
+          <EmailLable email={user.email} isEmailVerified={user.isEmailVerified} />
           <DropdownMenuSeparator />
           <DDLink href="/account" name="계정 설정" icon={<UserCog />} />
           <DDLink href="/support" name="고객센터" icon={<Phone />} />
@@ -55,6 +71,30 @@ export default function UserWidget({className} : {className?: string}){
     </div>
   )
 }
+
+
+function EmailLable({email, isEmailVerified} : {email: string, isEmailVerified: boolean}){
+  return (
+    <DropdownMenuLabel>
+      <div className="flex items-center">
+      </div>
+      <TooltipProvider delayDuration={1000}>
+        <Tooltip delayDuration={300}>
+          <TooltipTrigger className={clsx({["text-red-400"]: !isEmailVerified})}>
+            {email}
+          </TooltipTrigger>
+          <TooltipContent>
+            { !isEmailVerified 
+            ? <span className="text-red-500">이메일 인증이 필요합니다.</span>
+            : <span className="text-green-500">인증됨</span>
+            }
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </DropdownMenuLabel>
+  )
+}
+
 
 // Dropdown Menu의 item중, Link 컴포넌트 기반 + 아이콘인 경우
 function DDLink({href, name, icon} : {href: string, name: string, icon: React.ReactNode}){

@@ -19,9 +19,10 @@ export default function OAuth2SignupForm(){
   const { getUrlState } = useRouting();
 
   // 라우팅으로 같이 넘어온 데이터가 존재하지 않음 -> 라우팅을 통한 접근이 아니므로 에러
-  if(!getUrlState().email || !getUrlState().penname){
+  if(!getUrlState().signupCache){
     throw new Error("url state가 존재하지 않습니다.");
   }
+  const signupCache = getUrlState().signupCache;
 
   // Zod 스키마 정의
   const signupFormSchema = z.object({
@@ -35,8 +36,8 @@ export default function OAuth2SignupForm(){
   const signupForm = useForm<z.infer<typeof signupFormSchema>>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
-      email: getUrlState().email,
-      penname: getUrlState().penname,
+      email: signupCache.email,
+      penname: signupCache.penname,
     },
   })
 
@@ -44,8 +45,11 @@ export default function OAuth2SignupForm(){
   function onSubmit(values: z.infer<typeof signupFormSchema>){
     // Post 요청에 담을 객체를 생성
     const requestBody = {
+      username: signupCache.username,
+      password: signupCache.password,
       email: values.email,
       penname: values.penname,
+      profileImgUrl: signupCache.profileImgUrl,
     }
     // 회원가입 요청 전송
     api.anonymous().post("/signup")
