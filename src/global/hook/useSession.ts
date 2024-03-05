@@ -91,10 +91,12 @@ export const useSession: () => UseSessionResult = () => {
   }
 
 
+  // c.f.h: 로그아웃 로직 보충하기 -> 서버에 로그아웃 요청을 전송해서, RefreshToken을 제거하고, refreshTokenUUID 쿠키를 제거.
+
   // [4]: logout 로직 생성
   const logout = async () => {
     // 서버에 로그아웃 요청을 전송 -> 서버에서 RefreshToken을 제거하고, refreshTokenUUID 쿠키를 제거.
-    await api.post("/logout").actions({SUCCESS: logoutSuccess}).fetch<void>();
+    await api.post("/session/logout").actions({SUCCESS: logoutSuccess}).fetch<void>();
 
     function logoutSuccess(){
       // [3-1]: root 인증 상태를 제거
