@@ -1,5 +1,5 @@
 import { ApiCode, ApiCodeType } from "@/global/api/ApiCode";
-import { triggerToast } from "@/global/toast/ToastProvider";
+import { triggerToast } from "@/global/provider/ToastProvider";
 import { AxiosInstance, AxiosRequestConfig } from "axios";
 import { time, timeEnd } from "console";
 import { Dispatch, SetStateAction } from "react";

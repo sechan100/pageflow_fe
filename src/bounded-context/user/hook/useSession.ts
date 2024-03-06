@@ -1,12 +1,12 @@
 import { useQuery } from "react-query";
-import { QueryKeys } from "../../bounded-context/user/constants/query-key/ReactQueryKey";
+import { QueryKeys } from "../constants/query-key/ReactQueryKey";
 import { useApi } from "@/global/hook/useApi";
 import { useAuth } from "./useAuth";
-import { useAccessToken } from "@/global/hook/useAccessToken";
-import { AccessToken } from "@/bounded-context/user/service/AccessTokenStorage";
-import { triggerToast } from "../toast/ToastProvider";
+import { useAccessToken } from "@/bounded-context/user/hook/useAccessToken";
+import { AccessToken } from "@/bounded-context/user/object/AccessTokenStorage";
+import { triggerToast } from "../../../global/provider/ToastProvider";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useRouting } from "./useRouting";
+import { useRouting } from "../../../global/hook/useRouting";
 
 
 // 세션에 포함되는 사용자 정보 타입
@@ -47,7 +47,11 @@ export const useSession: () => UseSessionResult = () => {
   const { router } = useRouting();
 
   // [1]: react-query로 세션정보를 가져오고 캐싱
-  const queryFn = () => api.get("/user/session").actions({}).fetch<ServerSession>();
+  const queryFn = () => api
+    .get("/user/session")
+    .actions({})
+    .fetch<ServerSession>();
+
   const options = {
     enabled: isAuthenticated(), // 인증된 사용자만 세션 정보를 가져옴
   }
@@ -96,7 +100,10 @@ export const useSession: () => UseSessionResult = () => {
   // [4]: logout 로직 생성
   const logout = async () => {
     // 서버에 로그아웃 요청을 전송 -> 서버에서 RefreshToken을 제거하고, refreshTokenUUID 쿠키를 제거.
-    await api.post("/session/logout").actions({SUCCESS: logoutSuccess}).fetch<void>();
+    await api
+      .post("/session/logout")
+      .actions({SUCCESS: logoutSuccess})
+      .fetch<void>();
 
     function logoutSuccess(){
       // [3-1]: root 인증 상태를 제거

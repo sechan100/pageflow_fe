@@ -1,6 +1,6 @@
 'use client';
 import { useApi } from "@/global/hook/useApi";
-import { useSession } from "@/global/hook/useSession";
+import { useSession } from "@/bounded-context/user/hook/useSession";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 

@@ -19,7 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 
-import { useSession } from "@/global/hook/useSession";
+import { useSession } from "@/bounded-context/user/hook/useSession";
 import clsx from "clsx";
 
 

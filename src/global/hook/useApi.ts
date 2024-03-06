@@ -4,7 +4,7 @@ import { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { AsyncRequestBuilder } from "../api/AsyncRequestBuilder";
 import { useState } from "react";
 import { ApiCode, ApiCodeType } from "@/global/api/ApiCode";
-import { useAccessToken } from "./useAccessToken";
+import { useAccessToken } from "../../bounded-context/user/hook/useAccessToken";
 
 
 const BEARER = "Bearer ";

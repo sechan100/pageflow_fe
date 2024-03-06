@@ -4,7 +4,7 @@ import { zodUserSchemata } from "@/bounded-context/user/constants/zod/UserSchema
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useApi } from "@/global/hook/useApi";
-import { triggerToast } from "@/global/toast/ToastProvider";
+import { triggerToast } from "@/global/provider/ToastProvider";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";

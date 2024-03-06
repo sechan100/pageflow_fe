@@ -5,8 +5,8 @@ import { PencilLine } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Entrypoint from "../../bounded-context/user/components/entrypoint/Entrypoint";
-import { useSession } from "@/global/hook/useSession";
-import { useAuth } from "../hook/useAuth";
+import { useSession } from "@/bounded-context/user/hook/useSession";
+import { useAuth } from "../../bounded-context/user/hook/useAuth";
 
 
 

@@ -1,12 +1,12 @@
 'use client';
 import { create } from "zustand";
-import { triggerToast } from "../toast/ToastProvider";
+import { triggerToast } from "../../../global/provider/ToastProvider";
 
 export const SESSION_FLAG_NAME = "_pageflowSessionExpiredAt" as const;
 
 function getAuthStateFromLocalStorage(){
   const isAuthenticated = continueIfOnServer(() => {
-    const sessionFlag = getLocalStorage().getItem(SESSION_FLAG_NAME);
+    const sessionFlag = localStorage.getItem(SESSION_FLAG_NAME);
 
     // [1]: 세션지표가 존재하지 않는 경우 -> refreshToken 쿠키는 존재할 수도 있지만, 모르겠고 그냥 세션 없는걸로 간주
     if(!sessionFlag) {
@@ -26,20 +26,17 @@ function getAuthStateFromLocalStorage(){
   return isAuthenticated;
 }
 
-function authenticate(){
+function localStorageAuthenticate(){
   continueIfOnServer(() => {
     const expiredAt = Date.now() + 1000 * 60 * 60 * 24 * 30; // 30일
     localStorage.setItem(SESSION_FLAG_NAME, String(expiredAt));
   })
 }
 
-function deAuthenticate(){
+function localStorageDeAuthenticate(){
   continueIfOnServer(() => localStorage.removeItem(SESSION_FLAG_NAME))
 }
 
-function getLocalStorage(): Storage {
-  return window.localStorage;
-}
 
 function continueIfOnServer(callback: any){
   while(typeof window !== "undefined" && typeof window.localStorage !== "undefined"){
@@ -60,12 +57,12 @@ export const useAuth = create<RootAuth>((set, get) => ({
   },
 
   authenticate: () => {
-    authenticate();
+    localStorageAuthenticate();
     set({ rootAuth: true });
   },
 
   deAuthenticate: () => {
-    deAuthenticate();
+    localStorageDeAuthenticate();
     set({ rootAuth: false });
   },
 

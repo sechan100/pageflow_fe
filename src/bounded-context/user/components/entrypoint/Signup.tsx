@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { zodUserSchemata } from "@/bounded-context/user/constants/zod/UserSchemata";
 import { useApi } from "@/global/hook/useApi";
-import { triggerToast } from "@/global/toast/ToastProvider";
+import { triggerToast } from "@/global/provider/ToastProvider";
 
 
 
@@ -88,6 +88,7 @@ function SignupDialogForm(){
       password: values.passwordSchema.password,
       email: values.email,
       penname: values.penname,
+      profileImgUrl: null
     }
 
     // 회원가입 요청 전송
@@ -182,16 +183,4 @@ function SignupDialogForm(){
       <Button form="signup_form" type="submit" className="rounded-full">회원가입</Button>
     </Form>
   )
-}
-
-
-
-function DUPLICATED_USERNAME(){
-  triggerToast({
-    title: "이미 존재하는 아이디입니다.",
-    action: {
-      description: "로그인하러 가기",
-      onClick: () => {console.log("로그인 페이지로 이동합니다.")}
-    },
-  })
 }

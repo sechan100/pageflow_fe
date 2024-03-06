@@ -3,7 +3,7 @@
 import { ThemeProvider } from "@/global/theme/ThemeProvider";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { RejectedForCodeActionCall } from "@/global/api/AsyncRequestBuilder";
-import ToastProvider from "@/global/toast/ToastProvider";
+import ToastProvider from "@/global/provider/ToastProvider";
 import { createContext, useEffect } from "react";
 
 

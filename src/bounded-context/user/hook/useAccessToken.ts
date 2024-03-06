@@ -1,7 +1,7 @@
-import { AccessToken, AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/bounded-context/user/service/AccessTokenStorage";
+import { AccessToken, AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/bounded-context/user/object/AccessTokenStorage";
 import { create } from "zustand";
 import { DefaultAxiosFactory } from "@/global/api/DefaultAxiosFactory";
-import { triggerToast } from "@/global/toast/ToastProvider";
+import { triggerToast } from "@/global/provider/ToastProvider";
 import { useAuth } from "./useAuth";
 import { AsyncRequestBuilder } from "@/global/api/AsyncRequestBuilder";
 
@@ -19,36 +19,32 @@ export const useAccessToken = () => {
   const { deAuthenticate, isAuthenticated } = useAuth(); // 인증상태 참조
   const { storage } = useAccessTokenStore(); // 저장소 참조
 
+  // 토큰 저장 메소드
   const storeToken = (token: AccessToken) => {
     useAccessTokenStore.getState().storage.store(token);
   }
-
+  // 토큰 삭제 메소드
   const clearToken = () => {
     useAccessTokenStore.getState().storage.clear();
   }
-
-
+  // 토큰 가져오기 메소드
   const ensureToken: () => Promise<string> = async () => {
-
     // [0]: root 인증상태 확인후, 익명이라면 에러
     if(!isAuthenticated()){ // 동기적 참조
       throw new Error("인증되지 않은 사용자는 'ensureToken()'으로 토큰을 가져올 수 없습니다.");
     }
-    
+
     const isTokenExist: boolean = storage.isTokenExist();
     // [1]: 요청결정 변수: 해당 값을 최종확인하여, refresh 요청을 전송할지를 결정.
     let isRefreshRequired: boolean = false;
-  
-  
+
     // [2]: 토큰 상태 검증
     // 토큰 있음 => 만료여부 확인 
     if(isTokenExist){
       if(storage.isTokenExpired()){
         isRefreshRequired = true;
       }
-    /**
-     * 토큰 없음 -> isAuthentication이 true라면, refresh 요청을 보냄
-     */
+    // 토큰 없음 -> isAuthentication이 true라면, refresh 요청을 보냄
     } else {
       if(isAuthenticated()){
         isRefreshRequired = true;
@@ -57,23 +53,29 @@ export const useAccessToken = () => {
   
     // [3]: accessToken이 없다면 refresh 요청을 보내고, 새로운 토큰을 받아옴
     if(isRefreshRequired){
+      /**
+       * useApi훅에서 useAccessToken 훅을 참조하여 순환참조가 발생한다.
+       * 때문에 useAccessToken 훅은 useApi훅을 참조하지 않고 직접 api 인스턴스를 생성하여 사용함.
+       */
       const request = new AsyncRequestBuilder(DefaultAxiosFactory.createDefaultAxiosInstance());
-
-      const accessToken: AccessToken = await request.post("/session/refresh")
+      
+      // refresh 요청전송
+      const accessToken = await request
+        .post("/session/refresh")
         .actions({
           TOKEN_NOT_FOUND, // refreshTokenUUID 쿠키가 없는 경우 -> 세션 없음
           SESSION_EXPIRED // refreshTokenUUID 쿠키가 있지만, 만료된 경우 -> 세션 만료
         })
         .fetch<AccessToken>();
-  
+
       // 받아온 토큰 저장 후 반환.
       storage.store(accessToken);
       return accessToken.compact;
-  
+    
       // [4]: refresh 요청을 보내지 않고, 유효한 기존의 토큰을 그대로 반환
-      } else {
-        return storage.getToken();
-      }
+    } else {
+      return storage.getToken();
+    }
   }
 
   // CodeActions
