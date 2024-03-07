@@ -19,13 +19,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodUserSchemata } from "@/bounded-context/user/constants/zod/UserSchemata";
-import { AccessToken } from "../../object/AccessTokenStorage";
-import { useApi } from "@/global/hook/useApi";
-import { useAccessToken } from "@/bounded-context/user/hook/useAccessToken";
-import { triggerToast } from "@/global/provider/ToastProvider";
-import { useAuth } from "@/bounded-context/user/hook/useAuth";
-import { useSession } from "@/bounded-context/user/hook/useSession";
 import OAuth2LoginWidget from "./OAuth2LoginWidget";
+import { useSession } from "../../hook/useSession";
 
 
 export default function LoginTrigger({className}: {className?: string}){
@@ -47,7 +42,7 @@ export default function LoginTrigger({className}: {className?: string}){
 
 function LoginDialogForm(){
 
-  const { formLogin: login } = useSession();
+  const { formLogin } = useSession();
   
   const loginFormSchema = z.object({
     username: zodUserSchemata.username,
@@ -68,7 +63,7 @@ function LoginDialogForm(){
       <form id="login_form" onSubmit={loginForm.handleSubmit(
         ({username, password}) => {
           // form 제출 시 로그인 함수 실행
-          login(username, password);
+          formLogin(username, password);
         }
       )} className="space-y-2">
 

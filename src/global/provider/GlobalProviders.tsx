@@ -1,14 +1,11 @@
 'use client';
 
-import { ThemeProvider } from "@/global/theme/ThemeProvider";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { ThemeProvider } from "@/global/provider/ThemeProvider";
 import { RejectedForCodeActionCall } from "@/global/api/AsyncRequestBuilder";
 import ToastProvider from "@/global/provider/ToastProvider";
-import { createContext, useEffect } from "react";
+import { useEffect } from "react";
+import ReactQueryProvider from "./ReactQueryProvider";
 
-
-const queryClient = reactQueryConfig();
-export const QueryClientContext = createContext(queryClient);
 
 
 export default function GlobalProviders({children} : {children: React.ReactNode}){
@@ -23,10 +20,8 @@ export default function GlobalProviders({children} : {children: React.ReactNode}
         return;
       }
     };
-
     // 거부된 프로미스 처리 로직
     window.addEventListener('unhandledrejection', handleRejection);
-  
     return () => {
       window.removeEventListener('unhandledrejection', handleRejection);
     };
@@ -34,31 +29,11 @@ export default function GlobalProviders({children} : {children: React.ReactNode}
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <QueryClientProvider client={queryClient}>
-        <QueryClientContext.Provider value={queryClient}>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
-        </QueryClientContext.Provider>
-      </QueryClientProvider>
+      <ReactQueryProvider>
+        <ToastProvider>
+          {children}
+        </ToastProvider>
+      </ReactQueryProvider>
     </ThemeProvider>
   )
-}
-
-
-
-// react-query
-function reactQueryConfig(): QueryClient{
-  // react-query 전역 객체
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnMount: false, // 마운트 시에 리패치
-        refetchOnWindowFocus: false, // 윈도우 포커스 시에 리패치
-        retry: false, // 실패 시 재시도
-        staleTime: 1000 * 60 * 60 // staleTime 1시간
-      }
-    }
-  });
-  return queryClient;
 }

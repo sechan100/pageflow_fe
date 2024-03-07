@@ -13,9 +13,16 @@ export class DefaultAxiosFactory {
       throw new Error("NEXT_PUBLIC_API_PREFIX 환경변수가 설정되지 않았습니다.")
     }
 
-    return axios.create({
+    // Axios 객체 생성
+    const instance = axios.create({
       baseURL: process.env.NEXT_PUBLIC_CLIENT_HOST + process.env.NEXT_PUBLIC_API_PREFIX
     });
+
+    // 헤더 설정
+    instance.defaults.headers['Content-type'] = 'application/json; charset=UTF-8'; // 요청타입 헤더
+    instance.defaults.headers['Accept'] = 'application/json'; // 응답타입 헤더
+
+    return instance;
   }
 }
 

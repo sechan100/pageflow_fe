@@ -1,5 +1,4 @@
 'use client';
-import { useApi } from "@/global/hook/useApi";
 import { useSession } from "@/bounded-context/user/hook/useSession";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
@@ -7,11 +6,9 @@ import { useEffect, useRef } from "react";
 
 
 export default function OAuth2CodeRequester(){
-  const { api } = useApi();
   const { forEach  } = useSearchParams();
   const { provider } = useParams();
   const path = usePathname();
-
 
   const { oauth2Login } = useSession();
   const isAlreadyRequested = useRef(false);

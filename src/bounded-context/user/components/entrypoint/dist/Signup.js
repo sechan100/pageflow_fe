@@ -20,8 +20,7 @@ var react_hook_form_1 = require("react-hook-form");
 var form_1 = require("@/components/ui/form");
 var input_1 = require("@/components/ui/input");
 var UserSchemata_1 = require("@/bounded-context/user/constants/zod/UserSchemata");
-var useApi_1 = require("@/global/hook/useApi");
-var ToastProvider_1 = require("@/global/toast/ToastProvider");
+var api_1 = require("@/bounded-context/user/api");
 function SignupTrigger(_a) {
     var className = _a.className;
     return (React.createElement("div", { className: className },
@@ -33,7 +32,6 @@ function SignupTrigger(_a) {
 }
 exports["default"] = SignupTrigger;
 function SignupDialogForm() {
-    var api = useApi_1.useApi().api;
     // Zod 스키마 정의
     var signupFormSchema = zod_1.z.object({
         // username
@@ -69,15 +67,10 @@ function SignupDialogForm() {
             username: values.username,
             password: values.passwordSchema.password,
             email: values.email,
-            penname: values.penname
+            penname: values.penname,
+            profileImgUrl: null
         };
-        // 회원가입 요청 전송
-        api.anonymous().post("/signup")
-            .actions({
-            DUPLICATED_USERNAME: DUPLICATED_USERNAME
-        })
-            .data(signupForm)
-            .fetch();
+        api_1.signup(signupForm);
     }
     return (React.createElement(form_1.Form, __assign({}, signupForm),
         React.createElement("form", { id: "signup_form", onSubmit: signupForm.handleSubmit(onSubmit), className: "space-y-2" },
@@ -122,13 +115,4 @@ function SignupDialogForm() {
                         React.createElement(form_1.FormMessage, null)));
                 } })),
         React.createElement(button_1.Button, { form: "signup_form", type: "submit", className: "rounded-full" }, "\uD68C\uC6D0\uAC00\uC785")));
-}
-function DUPLICATED_USERNAME() {
-    ToastProvider_1.triggerToast({
-        title: "이미 존재하는 아이디입니다.",
-        action: {
-            description: "로그인하러 가기",
-            onClick: function () { console.log("로그인 페이지로 이동합니다."); }
-        }
-    });
 }

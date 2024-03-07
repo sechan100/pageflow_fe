@@ -20,7 +20,8 @@ var react_hook_form_1 = require("react-hook-form");
 var form_1 = require("@/components/ui/form");
 var input_1 = require("@/components/ui/input");
 var UserSchemata_1 = require("@/bounded-context/user/constants/zod/UserSchemata");
-var useSession_1 = require("@/global/hook/useSession");
+var OAuth2LoginWidget_1 = require("./OAuth2LoginWidget");
+var useSession_1 = require("../../hook/useSession");
 function LoginTrigger(_a) {
     var className = _a.className;
     return (React.createElement("div", { className: className },
@@ -28,11 +29,12 @@ function LoginTrigger(_a) {
             React.createElement(dialog_1.DialogTrigger, { asChild: true },
                 React.createElement(button_1.Button, { className: "rounded-full" }, "\uB85C\uADF8\uC778")),
             React.createElement(dialog_1.DialogContent, null,
-                React.createElement(LoginDialogForm, null)))));
+                React.createElement(LoginDialogForm, null),
+                React.createElement(OAuth2LoginWidget_1["default"], null)))));
 }
 exports["default"] = LoginTrigger;
 function LoginDialogForm() {
-    var login = useSession_1.useSession().login;
+    var formLogin = useSession_1.useSession().formLogin;
     var loginFormSchema = zod_1.z.object({
         username: UserSchemata_1.zodUserSchemata.username,
         password: UserSchemata_1.zodUserSchemata.password
@@ -47,7 +49,8 @@ function LoginDialogForm() {
     return (React.createElement(form_1.Form, __assign({}, loginForm),
         React.createElement("form", { id: "login_form", onSubmit: loginForm.handleSubmit(function (_a) {
                 var username = _a.username, password = _a.password;
-                login(username, password);
+                // form 제출 시 로그인 함수 실행
+                formLogin(username, password);
             }), className: "space-y-2" },
             React.createElement(form_1.FormField, { control: loginForm.control, name: "username", render: function (_a) {
                     var field = _a.field;

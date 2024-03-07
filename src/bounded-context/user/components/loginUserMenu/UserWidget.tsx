@@ -18,9 +18,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-
-import { useSession } from "@/bounded-context/user/hook/useSession";
 import clsx from "clsx";
+import { Session, useSession } from "../../hook/useSession";
 
 
 
@@ -28,15 +27,16 @@ import clsx from "clsx";
 
 export default function UserWidget({className} : {className?: string}){
 
-  const { session, logout } = useSession();
+  const { session, isSessionLoading, logout } = useSession();
 
 
-  const { user } = session;
-  if(!user) return (
+  if(isSessionLoading) return (
     <div className="px-3 text-red-100">
-      세션 정보가 없습니다.
+      사용자 정보를 불러오는 중입니다...
     </div>
   );
+  const user = (session as Session).user;
+
 
   return (
     <div className={className}>

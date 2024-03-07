@@ -1,12 +1,11 @@
 'use client';
-import { ThemeSwitcher } from "@/global/theme/ThemeSwitcher";
+import { ThemeSwitcher } from "@/global/components/ThemeSwitcher";
 import UserWidget from "../../bounded-context/user/components/loginUserMenu/UserWidget";
 import { PencilLine } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Entrypoint from "../../bounded-context/user/components/entrypoint/Entrypoint";
 import { useSession } from "@/bounded-context/user/hook/useSession";
-import { useAuth } from "../../bounded-context/user/hook/useAuth";
 
 
 
@@ -15,13 +14,13 @@ import { useAuth } from "../../bounded-context/user/hook/useAuth";
 
 export default function Header(){
 
-  const { session } = useSession();
+  const { isAuthenticated } = useSession();
   
   return (
     <header className="flex justify-between items-center container mt-5">
       <Title />
       <div className="flex items-center">
-        {session.isAuthenticated ?
+        {isAuthenticated ?
         // 로그인
         <>
           <WriteLinkBtn />

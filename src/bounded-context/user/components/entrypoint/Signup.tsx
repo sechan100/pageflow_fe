@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodUserSchemata } from "@/bounded-context/user/constants/zod/UserSchemata";
-import { useApi } from "@/global/hook/useApi";
-import { triggerToast } from "@/global/provider/ToastProvider";
+import { SignupForm, signup } from "@/bounded-context/user/api"
+
 
 
 
@@ -44,7 +44,6 @@ export default function SignupTrigger({className}: {className?: string}){
 
 
 function SignupDialogForm(){
-  const { api } = useApi();
 
   // Zod 스키마 정의
   const signupFormSchema = z.object({
@@ -83,21 +82,14 @@ function SignupDialogForm(){
   })
 
   function onSubmit(values: z.infer<typeof signupFormSchema>) {
-    const signupForm = {
+    const signupForm: SignupForm = {
       username: values.username,
       password: values.passwordSchema.password,
       email: values.email,
       penname: values.penname,
       profileImgUrl: null
     }
-
-    // 회원가입 요청 전송
-    api.anonymous().post("/signup")
-    .actions({
-      DUPLICATED_USERNAME,
-    })
-    .data(signupForm)
-    .fetch<void>();
+    signup(signupForm)
   }
 
   return (

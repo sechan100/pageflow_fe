@@ -1,16 +1,17 @@
-import { useQuery } from "react-query";
-import { QueryKeys } from "../constants/query-key/ReactQueryKey";
-import { useApi } from "@/global/hook/useApi";
-import { useAuth } from "./useAuth";
-import { useAccessToken } from "@/bounded-context/user/hook/useAccessToken";
-import { AccessToken } from "@/bounded-context/user/object/AccessTokenStorage";
-import { triggerToast } from "../../../global/provider/ToastProvider";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useRouting } from "../../../global/hook/useRouting";
+import { create } from "zustand";
+import { rootAuth } from "../modules/rootAuth";
+import { anonymousApi } from "@/global/api/anonymousApi";
+import { AccessToken } from "../class/PrivatePropertyAccessTokenStorage";
+import { accessTokenManager } from "../modules/accessTokenManager";
+import { useQuery, useQueryClient } from "react-query";
+import { queryKeys } from "@/global/constants/queryKeys";
+import { triggerToast } from "@/global/provider/ToastProvider";
+import { useRouting } from "@/global/hook/useRouting";
+import { api } from "@/global/api/api";
 
 
 // 세션에 포함되는 사용자 정보 타입
-export interface UserSession{
+interface SessionUser {
   id: number;
   email: string;
   username: string;
@@ -19,102 +20,106 @@ export interface UserSession{
   role: "ROLE_USER" | "ROLE_MANAGER" |"ROLE_ADMIN";
   isEmailVerified: boolean;
 }
-
-// 서버 api에서 반환하는 세션 타입
-interface ServerSession {
-  user: UserSession;
+// 세션 타입
+interface Session {
+  user: SessionUser;
 }
-// FE에서 실제로 사용될 세션 타입
-export interface ClientSession {
+interface UseSessionStore {
   isAuthenticated: boolean;
-  user: UserSession | null;
+  setIsAuthenticated: (isAuthenticated: boolean) => void;
 }
 
 
+const { isAuthenticated, authenticate, deAuthenticate } = rootAuth;
+const { storeToken, clearToken } = accessTokenManager;
 
-interface UseSessionResult{
-  session: ClientSession;
-  formLogin: (username: string, password: string) => void;
-  oauth2Login: (url: string) => void;
-  logout: () => void;
-}
+const useSessionStore = create<UseSessionStore>((set) => ({
+  isAuthenticated: isAuthenticated(), // 최초 초기화는 rootAuth로부터 가져옴
+  setIsAuthenticated: (isAuthenticated) => set({isAuthenticated}),
+}));
 
-export const useSession: () => UseSessionResult = () => {
 
-  const { api } = useApi();
-  const { isAuthenticated, authenticate, deAuthenticate } = useAuth();
-  const { storeToken, clearToken } = useAccessToken();
+// useSession 훅
+const useSession = () => {
+  const { isAuthenticated, setIsAuthenticated } = useSessionStore();
   const { router } = useRouting();
 
-  // [1]: react-query로 세션정보를 가져오고 캐싱
-  const queryFn = () => api
-    .get("/user/session")
-    .actions({})
-    .fetch<ServerSession>();
+  // useQuery
+  const sessionQueryResult = useQuery<Session>(
+    // queryKey
+    [queryKeys.user.session], 
+    // queryFn
+    () => { 
+      return api
+      .get("/user/session")
+      .actions({})
+      .fetch<Session>() 
+    }, 
+    // options
+    { enabled: isAuthenticated }
+  );
 
-  const options = {
-    enabled: isAuthenticated(), // 인증된 사용자만 세션 정보를 가져옴
-  }
-  // useQuery를 사용하여 세션 정보를 가져오고 캐싱후 반환
-  const useQueryResult = useQuery<ServerSession>(QueryKeys.user.session, queryFn, options);
-  // ServerSession 타입을 ClientSession 타입으로 변환
-  const session = useQueryResult.data ? convertToClient(useQueryResult.data) : anonymousSession();
-
-
-  // [2]: formLogin 로직 생성
+  // form 로그인
   const formLogin = async (username: string, password: string) => {
-    const accessToken = await api
-        .anonymous()
-        .post("/login")
-        .actions({
-          USER_NOT_FOUND,
-        })
-        .data({username, password})
-        .fetch<AccessToken>();
-        
-    // root 인증상태를 설정
+    const accessToken = await anonymousApi
+    .anonymous()
+    .post("/login")
+    .actions({
+      USER_NOT_FOUND,
+    })
+    .data({username, password})
+    .fetch<AccessToken>();
+
+    // (1): root 인증상태 -> 인증
     authenticate();
-    // 토큰 저장
+    // (2): accessToken 저장
     storeToken(accessToken);
+    // (3): 세션 정보 캐싱
+    // useSession()훅에서 알아서 서버 요청하고 캐싱할거임.
+    // (4): 상태 업데이트
+    setIsAuthenticated(true);
   }
 
-  // [3]: oauth2Login 로직 생성
-  const oauth2Login = async (url: string) => {
-    const accessToken = await api
-        .anonymous()
-        .get(url)
-        .actions({
-          OAUTH2_SIGNUP_REQUIRED,
-        })
-        .fetch<AccessToken>();
+  // oauth2 로그인
+  const oauth2Login = async (authorizationCodeUri: string) => {
+    const accessToken = await anonymousApi
+    .get(authorizationCodeUri)
+    .actions({
+      OAUTH2_SIGNUP_REQUIRED: (userData) => {
+        router.push("/signup/oauth2", {signupCache: userData})
+      }
+    })
+    .fetch<AccessToken>();
         
-    // root 인증상태를 설정
+    // (1): root 인증상태 -> 인증
     authenticate();
-    // 토큰 저장
+    // (2): accessToken 저장
     storeToken(accessToken);
+    // (3): 세션 정보 캐싱
+    // useSession()훅에서 알아서 서버 요청하고 캐싱할거임.
+    // (4): 상태 업데이트
+    setIsAuthenticated(true);
   }
 
-
-  // c.f.h: 로그아웃 로직 보충하기 -> 서버에 로그아웃 요청을 전송해서, RefreshToken을 제거하고, refreshTokenUUID 쿠키를 제거.
-
-  // [4]: logout 로직 생성
+  // 로그아웃
   const logout = async () => {
     // 서버에 로그아웃 요청을 전송 -> 서버에서 RefreshToken을 제거하고, refreshTokenUUID 쿠키를 제거.
-    await api
+    await anonymousApi
       .post("/session/logout")
       .actions({SUCCESS: logoutSuccess})
       .fetch<void>();
 
     function logoutSuccess(){
-      // [3-1]: root 인증 상태를 제거
+      // (1): root 인증상태 -> 익명
       deAuthenticate();
-      // [3-2]: session 정보 제거
-      useQueryResult.remove();
-      // [3-3]: accessToken 제거
+      // (2): accessToken 제거
       clearToken();
+      // (3): session 정보 제거
+      sessionQueryResult.remove();
+      // (4): 상태 업데이트
+      setIsAuthenticated(false);
     }
   }
-
 
   function USER_NOT_FOUND(){
     triggerToast({
@@ -126,28 +131,16 @@ export const useSession: () => UseSessionResult = () => {
     })
   }
 
-  function OAUTH2_SIGNUP_REQUIRED(userData: any){
-    router.push("/signup/oauth2", {signupCache: userData});
-  }
-
   return {
-    session,
-    formLogin,
-    oauth2Login,
-    logout,
+    isAuthenticated, // 인증상태(Zustand)
+    formLogin, // 폼 로그인
+    oauth2Login, // oauth2 로그인
+    logout, // 로그아웃
+    session: sessionQueryResult.data, // 세션 정보
+    isSessionLoading: sessionQueryResult.isLoading, // 세션 정보 로딩 상태
   }
-}
+};
 
-const convertToClient = (serverSession: ServerSession): ClientSession => {  
-  return {
-    isAuthenticated: true,
-    user: serverSession.user,
-  }
-}
 
-const anonymousSession = (): ClientSession => {
-  return {
-    isAuthenticated: false,
-    user: null,
-  }
-}
+export { useSession };
+export type { Session, SessionUser };

@@ -1,4 +1,4 @@
-import { FormItem } from "@/components/ui/form";
+import { anonymousApi } from "@/global/api/anonymousApi";
 import { triggerToast } from "@/global/provider/ToastProvider";
 
 
@@ -14,17 +14,17 @@ interface SignupForm {
   profileImgUrl: string | null;
 }
 
-
-
-
 const signup = async (form: SignupForm) => {
   // 회원가입 요청 전송
-  api.anonymous().post("/signup")
+  await anonymousApi.post("/signup")
   .actions({
     DUPLICATED_USERNAME,
   })
   .data(form)
   .fetch<void>();
+
+  // 회원가입 성공 시 -> 비동기 성공 반환
+  Promise.resolve();
 }
 
 
@@ -37,3 +37,6 @@ function DUPLICATED_USERNAME(){
     },
   })
 }
+
+export default signup;
+export type { SignupForm };

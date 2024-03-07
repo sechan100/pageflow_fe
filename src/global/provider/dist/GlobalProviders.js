@@ -1,14 +1,11 @@
 'use client';
 "use strict";
 exports.__esModule = true;
-exports.QueryClientContext = void 0;
-var ThemeProvider_1 = require("@/global/theme/ThemeProvider");
-var react_query_1 = require("react-query");
+var ThemeProvider_1 = require("@/global/provider/ThemeProvider");
 var AsyncRequestBuilder_1 = require("@/global/api/AsyncRequestBuilder");
-var ToastProvider_1 = require("@/global/toast/ToastProvider");
+var ToastProvider_1 = require("@/global/provider/ToastProvider");
 var react_1 = require("react");
-var queryClient = reactQueryConfig();
-exports.QueryClientContext = react_1.createContext(queryClient);
+var ReactQueryProvider_1 = require("./ReactQueryProvider");
 function GlobalProviders(_a) {
     var children = _a.children;
     react_1.useEffect(function () {
@@ -28,23 +25,7 @@ function GlobalProviders(_a) {
         };
     }, []);
     return (React.createElement(ThemeProvider_1.ThemeProvider, { attribute: "class", defaultTheme: "system", enableSystem: true },
-        React.createElement(react_query_1.QueryClientProvider, { client: queryClient },
-            React.createElement(exports.QueryClientContext.Provider, { value: queryClient },
-                React.createElement(ToastProvider_1["default"], null, children)))));
+        React.createElement(ReactQueryProvider_1["default"], null,
+            React.createElement(ToastProvider_1["default"], null, children))));
 }
 exports["default"] = GlobalProviders;
-// react-query
-function reactQueryConfig() {
-    // react-query 전역 객체
-    var queryClient = new react_query_1.QueryClient({
-        defaultOptions: {
-            queries: {
-                refetchOnMount: false,
-                refetchOnWindowFocus: false,
-                retry: false,
-                staleTime: 1000 * 60 * 60 // staleTime 1시간
-            }
-        }
-    });
-    return queryClient;
-}

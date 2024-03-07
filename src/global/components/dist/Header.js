@@ -1,19 +1,19 @@
 'use client';
 "use strict";
 exports.__esModule = true;
-var ThemeSwitcher_1 = require("@/global/theme/ThemeSwitcher");
+var ThemeSwitcher_1 = require("@/global/components/ThemeSwitcher");
 var UserWidget_1 = require("../../bounded-context/user/components/loginUserMenu/UserWidget");
 var lucide_react_1 = require("lucide-react");
 var link_1 = require("next/link");
 var button_1 = require("@/components/ui/button");
 var Entrypoint_1 = require("../../bounded-context/user/components/entrypoint/Entrypoint");
-var useSession_1 = require("@/global/hook/useSession");
+var useSession_1 = require("@/bounded-context/user/hook/useSession");
 function Header() {
-    var session = useSession_1.useSession().session;
+    var isAuthenticated = useSession_1.useSession().isAuthenticated;
     return (React.createElement("header", { className: "flex justify-between items-center container mt-5" },
         React.createElement(Title, null),
         React.createElement("div", { className: "flex items-center" },
-            session.isAuthenticated ?
+            isAuthenticated ?
                 // 로그인
                 React.createElement(React.Fragment, null,
                     React.createElement(WriteLinkBtn, null),
