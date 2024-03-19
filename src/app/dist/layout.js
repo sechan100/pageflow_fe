@@ -3,9 +3,9 @@ exports.__esModule = true;
 exports.metadata = void 0;
 var google_1 = require("next/font/google");
 require("./globals.css");
-var Header_1 = require("../global/components/Header");
+var Header_1 = require("../bounded-context/common/Header");
 var react_1 = require("react");
-var GlobalProviders_1 = require("../global/components/GlobalProviders");
+var GlobalProviders_1 = require("../global/provider/GlobalProviders");
 var inter = google_1.Inter({ subsets: ["latin"] });
 exports.metadata = {
     title: "Pageflow"

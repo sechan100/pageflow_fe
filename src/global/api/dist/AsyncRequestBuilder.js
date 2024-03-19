@@ -63,7 +63,7 @@ var _axios, _config, _actions, _auth;
 exports.__esModule = true;
 exports.AsyncRequestBuilder = exports.RejectedForCodeActionCall = void 0;
 var ApiCode_1 = require("@/global/api/ApiCode");
-var ToastProvider_1 = require("@/global/toast/ToastProvider");
+var ToastProvider_1 = require("@/global/provider/ToastProvider");
 // 요청 Promise의 실패의 원인이 CodeAction의 올바른 호출에 의한 것인 경우 해당 에러를 통해 reject한다.
 var RejectedForCodeActionCall = /** @class */ (function () {
     function RejectedForCodeActionCall(code, message) {

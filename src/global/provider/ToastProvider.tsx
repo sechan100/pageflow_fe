@@ -1,7 +1,7 @@
-import { ToastAction } from "@/components/ui/toast";
-import { Toaster } from "@/components/ui/toaster";
-import { useToast } from "@/components/ui/use-toast";
-import EventEmitter from "@/libs/EventEmitter";
+import { ToastAction } from "@/shared/components/shadcn/toast";
+import { Toaster } from "@/shared/components/shadcn/toaster";
+import { useToast } from "@/shared/components/shadcn/use-toast";
+import EventEmitter from "@/shared/libs/EventEmitter";
 
 
 

@@ -1,13 +1,13 @@
 'use client';
 
-import { zodUserSchemata } from "@/bounded-context/user/constants/zod/UserSchemata";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { zodUserSchemata } from "@/bounded-context/user/shared/UserSchemata";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/shadcn/form";
+import { Input } from "@/shared/components/shadcn/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/shadcn/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useRouting } from "@/global/hook/useRouting";
+import { useRouting } from "@/shared/hook/useRouting";
 import signup, { SignupForm } from "@/bounded-context/user/api/signup";
 
 

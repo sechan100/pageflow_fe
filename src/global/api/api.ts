@@ -1,7 +1,7 @@
 import { DefaultAxiosFactory } from "./DefaultAxiosFactory";
 import { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { AsyncRequestBuilder } from "./AsyncRequestBuilder";
-import { accessTokenManager } from "../../bounded-context/user/class/accessTokenManager";
+import { accessTokenManager } from "../../bounded-context/user/model/accessTokenManager";
 
 
 const BEARER = "Bearer ";
