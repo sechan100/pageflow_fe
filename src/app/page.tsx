@@ -6,7 +6,9 @@ export default function Home() {
 
   return (
     <>
-      <h1>메인 페이지</h1>
+      <h1 className="text-3xl">
+        메인페이지
+      </h1>
     </>
   );
 }

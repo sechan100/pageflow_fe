@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { zodUserSchemata } from "@/bounded-context/user/constants/zod/UserSchemata";
-import { SignupForm, signup } from "@/bounded-context/user/api"
+import signup, { SignupForm } from "@/bounded-context/user/api/signup";
 
 
 

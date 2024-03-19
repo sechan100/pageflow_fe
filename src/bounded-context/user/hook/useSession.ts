@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { rootAuth } from "../modules/rootAuth";
 import { anonymousApi } from "@/global/api/anonymousApi";
 import { AccessToken } from "../class/PrivatePropertyAccessTokenStorage";
-import { accessTokenManager } from "../modules/accessTokenManager";
+import { accessTokenManager } from "../class/accessTokenManager";
 import { useQuery, useQueryClient } from "react-query";
 import { queryKeys } from "@/global/constants/queryKeys";
 import { triggerToast } from "@/global/provider/ToastProvider";

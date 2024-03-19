@@ -20,7 +20,7 @@ var react_hook_form_1 = require("react-hook-form");
 var form_1 = require("@/components/ui/form");
 var input_1 = require("@/components/ui/input");
 var UserSchemata_1 = require("@/bounded-context/user/constants/zod/UserSchemata");
-var api_1 = require("@/bounded-context/user/api");
+var signup_1 = require("@/bounded-context/user/api/signup");
 function SignupTrigger(_a) {
     var className = _a.className;
     return (React.createElement("div", { className: className },
@@ -70,7 +70,7 @@ function SignupDialogForm() {
             penname: values.penname,
             profileImgUrl: null
         };
-        api_1.signup(signupForm);
+        signup_1["default"](signupForm);
     }
     return (React.createElement(form_1.Form, __assign({}, signupForm),
         React.createElement("form", { id: "signup_form", onSubmit: signupForm.handleSubmit(onSubmit), className: "space-y-2" },

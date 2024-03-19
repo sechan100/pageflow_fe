@@ -1,6 +1,6 @@
 import { AccessToken, AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/bounded-context/user/class/PrivatePropertyAccessTokenStorage";
 import { triggerToast } from "@/global/provider/ToastProvider";
-import { rootAuth } from "./rootAuth";
+import { rootAuth } from "../modules/rootAuth";
 import { anonymousApi } from "@/global/api/anonymousApi";
 
 

@@ -1,7 +1,7 @@
 import { ToastAction } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
-import EventEmitter from "@/libs/event/EventEmitter";
+import EventEmitter from "@/libs/EventEmitter";
 
 
 

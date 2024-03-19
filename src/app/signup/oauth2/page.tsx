@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouting } from "@/global/hook/useRouting";
-import { SignupForm, signup } from "@/bounded-context/user/api";
+import signup, { SignupForm } from "@/bounded-context/user/api/signup";
 
 
 
