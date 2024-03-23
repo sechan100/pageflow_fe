@@ -1,8 +1,6 @@
 "use client"
-
 import React, { use, useEffect, useState } from "react"
 import * as SwitchPrimitives from "@radix-ui/react-switch"
-
 import { cn } from "@/shared/libs/utils"
 import { Moon, Sun } from "lucide-react"
 import "../../shared/styles/utils.css"
@@ -20,7 +18,6 @@ const ThemeSwitcher = React.forwardRef<
   useEffect(() => {
     setIsDark(theme === "dark");
   }, [theme])
-
   
   return(
     <SwitchPrimitives.Root

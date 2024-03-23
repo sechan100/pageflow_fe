@@ -12,7 +12,7 @@ exports.metadata = {
 };
 function RootLayout(_a) {
     var children = _a.children;
-    return (react_1["default"].createElement("html", { suppressHydrationWarning: true, lang: "ko" },
+    return (react_1["default"].createElement("html", { lang: "ko", suppressHydrationWarning: true },
         react_1["default"].createElement("head", null),
         react_1["default"].createElement("body", { className: inter.className },
             react_1["default"].createElement(GlobalProviders_1["default"], null,

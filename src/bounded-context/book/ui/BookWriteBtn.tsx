@@ -1,10 +1,11 @@
+'use client';
 import { PencilLine } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/shared/components/shadcn/button";
 
 
 
-function BookWriteBtn(){
+const BookWriteBtn = () => {
   return (
     <Link href="/book/write">
       <Button variant="outline" className="rounded-full">
@@ -15,4 +16,4 @@ function BookWriteBtn(){
 }
 
 
-export { BookWriteBtn };
+export default BookWriteBtn ;
