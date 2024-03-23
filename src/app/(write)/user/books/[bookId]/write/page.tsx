@@ -13,10 +13,10 @@ export default function BookWritePage() {
 
 
   return (
-    <>
-      목차
-      <Separator />
-      글 작성 페이지
-    </>
+    <div className="flex h-10">
+      <div>목차</div>
+      <Separator orientation="vertical" />
+      <div>글 작성</div>
+    </div>
   );
 }

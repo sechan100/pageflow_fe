@@ -13,7 +13,7 @@ const ClientHeader = dynamic(() => import("../common/ClientHeader"), {ssr: false
 export default function Header(){
   return (
     <>
-      <header className="flex justify-between items-center container mt-3">
+      <header className="flex justify-between items-center container pt-3">
         <Title />
         <div className="flex items-center">
           <ClientHeader />
