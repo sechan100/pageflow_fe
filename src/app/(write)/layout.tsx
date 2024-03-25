@@ -1,3 +1,4 @@
+import { cn } from "@/shared/libs/utils"
 import GlobalLayout from "../GlobalLayout"
 
 
@@ -12,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <GlobalLayout>
-      <div className="container">
+      <div className={cn("h-[100vh]")}>
         {children}
       </div>
     </GlobalLayout>
