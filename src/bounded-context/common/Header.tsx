@@ -1,26 +1,28 @@
-'use client';
-import { ThemeSwitcher } from "@/bounded-context/common/ThemeSwitcher";
-import { Title } from "./Title";
-import dynamic from "next/dynamic";
-import { Separator } from "@/shared/components/shadcn/separator";
-
-
-const ClientHeader = dynamic(() => import("../common/ClientHeader"), {ssr: false});
+import BookWriteBtn from "../book/ui/BookWriteBtn";
+import { useSession } from "../user/hooks/useSession";
+import Entrypoint from "../user/ui/Entrypoint";
+import UserInfoWidget from "../user/ui/UserWidget";
 
 
 
 
 export default function Header(){
+  
+  const { isAuthenticated } = useSession();
+
   return (
     <>
-      <header className="flex justify-between items-center container pt-3">
-        <Title />
-        <div className="flex items-center">
-          <ClientHeader />
-          <ThemeSwitcher />
-        </div>
-      </header>
-      <Separator className="my-3" />
+      {isAuthenticated ?
+        // 로그인
+        <>
+          <BookWriteBtn />
+          <UserInfoWidget className="mx-2" />
+        </> :
+        // 비회원
+        <>
+          <Entrypoint className="mx-2" />
+        </>
+        }
     </>
   )
 }

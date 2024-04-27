@@ -1,5 +1,5 @@
 "use client"
-import React, { use, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import * as SwitchPrimitives from "@radix-ui/react-switch"
 import { cn } from "@/shared/libs/utils"
 import { Moon, Sun } from "lucide-react"
@@ -7,7 +7,7 @@ import "../../shared/styles/utils.css"
 import { useTheme } from "next-themes"
 
 // radix와 shadcn/ui 디자인을 기반으로하여 만든 테마 변경 컴포넌트(클라 컴포)
-const ThemeSwitcher = React.forwardRef<
+const ThemeSwitch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
 >(({ className, ...props }, ref) => {
@@ -44,6 +44,6 @@ const ThemeSwitcher = React.forwardRef<
     </SwitchPrimitives.Root>
     )}
   )
-ThemeSwitcher.displayName = SwitchPrimitives.Root.displayName
+ThemeSwitch.displayName = SwitchPrimitives.Root.displayName
 
-export { ThemeSwitcher }
+export { ThemeSwitch as ThemeSwitcher }

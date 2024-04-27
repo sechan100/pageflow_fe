@@ -1,5 +1,5 @@
 'use client';
-import { useSession } from "@/bounded-context/user/model/useSession";
+import { useSession } from "@/bounded-context/user/hooks/useSession";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 

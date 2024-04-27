@@ -1,5 +1,5 @@
 import "../globals.css";
-import Header from "../../bounded-context/common/Header";
+import HeaderLayout from "../../bounded-context/common/HeaderLayout";
 import React from "react";
 import GlobalLayout from "../GlobalLayout";
 
@@ -13,7 +13,7 @@ export default function RootLayout({
 
   return (
     <GlobalLayout>
-      <Header />
+      <HeaderLayout />
       <div className="container">
         {children}
       </div>

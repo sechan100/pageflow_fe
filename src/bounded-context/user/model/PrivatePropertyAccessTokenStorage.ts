@@ -1,8 +1,7 @@
+import assert from "assert";
+import { AccessToken } from "../types/token";
 
-/**
- * accessToken 저장소의 추상화.
- * 해당 객체의 생성과 관리는 오직 SessionManager에서만 이루어진다. 
- */
+// accessToken 저장소 추상화
 export interface AccessTokenStorage {
   store(accessToken: AccessToken): void;
   clear(): void;
@@ -11,57 +10,45 @@ export interface AccessTokenStorage {
   getToken(): string;
 }
 
-export interface AccessToken {
-  compact: string;
-  expiredAt: number;
-}
+
 
 
 // private property에 토큰을 저장하는 방식
 class PrivatePropertyAccessTokenStorage implements AccessTokenStorage {
 
-  #compact: string | null = null;
-  #expiredAt: number | null = null;
+  #token: AccessToken | null = null;
 
-  // 새로운 토큰을 발급받았거나, 초기화했을 경우
+
+  // storage에 새로운 토큰을 저장한다. 기존 토큰이 남아있다면 덮어쓴다.
   store(accessToken: AccessToken): void {
-    if(!accessToken.compact || !accessToken.expiredAt){
-      throw new Error("올바른 토큰 정보가 아닙니다.");
-    }
-    this.#compact = accessToken.compact;
-    this.#expiredAt = accessToken.expiredAt;
+    this.#token = accessToken;
   }
 
-  // Storage를 비움
+  // Storage를 비운다
   clear(): void {
-    this.#compact = null;
-    this.#expiredAt = null;
+    this.#token = null;
   }
 
-  // 토큰의 존재성을 확인
+  // 토큰의 만료여부와 관계없이, 존재하는지만을 확인한다. 
   isTokenExist(): boolean {
-    return this.#compact ? true : false;
+    return this.#token ? true : false;
   }
 
   // 토큰의 만료 여부를 확인
   isTokenExpired(): boolean {
-    if(!this.isTokenExist() || !this.#expiredAt){
-      throw new Error("토큰이 존재하지 않습니다.");
+    if(!this.#token){
+      throw new Error("can't evalueate 'exp' for token is null");
     }
-    return Date.now() > this.#expiredAt;
+    return Date.now() > this.#token.exp;
   }
 
   // 토큰을 반환
   getToken(): string {
-    if(!this.#compact){
-      throw new Error("AccessToken 존재하지 않습니다.");
+    if(!this.#token){
+      throw new Error("can't evalueate 'exp' for token is null");
     }
-    return this.#compact;
+    return this.#token.compact;
   }
-
-
-
-
 }
 
 

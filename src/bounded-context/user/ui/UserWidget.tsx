@@ -18,23 +18,25 @@ import {
   TooltipTrigger,
 } from "@/shared/components/shadcn/tooltip"
 import clsx from "clsx";
-import { Session, useSession } from "../model/useSession";
+import { useSession } from "../hooks/useSession";
 
 
 
 
 
-export default function UserWidget({className} : {className?: string}){
+export default function UserInfoWidget({className} : {className?: string}){
 
   const { session, isSessionLoading, logout } = useSession();
 
 
-  if(isSessionLoading) return (
-    <div className="px-3 text-red-100">
-      사용자 정보를 불러오는 중입니다...
-    </div>
-  );
-  const user = (session as Session).user;
+  if(isSessionLoading || !session){
+    return (
+      <div className="px-3 text-red-100">
+        사용자 정보를 불러오는 중입니다...
+      </div>
+    );
+  }
+  const user = session.user;
 
 
   return (
@@ -45,7 +47,7 @@ export default function UserWidget({className} : {className?: string}){
             <div className="flex items-center justify-between">
               <Avatar className="mr-2">
                 <AvatarImage
-                  src={user.profileImgUrl}
+                  src={user.profileImageUrl}
                   alt="profile image"
                 />
                 <AvatarFallback>

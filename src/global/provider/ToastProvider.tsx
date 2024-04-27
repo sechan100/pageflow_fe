@@ -6,9 +6,9 @@ import EventEmitter from "@/shared/libs/EventEmitter";
 
 
 
-export interface ToastContext {
+export interface ToastCmd {
   variant?: "default" | "destructive";
-  title: string;
+  title?: string;
   description?: string;
   action?: {
     description: string;
@@ -23,7 +23,7 @@ export default function ToastProvider({ children }: { children: React.ReactNode;
   const { toast } = useToast();
   const event: EventEmitter = EventEmitter.getInstance();
 
-  event.on(TOAST_EVENT_NAME, (toastContext: ToastContext) => {
+  event.on(TOAST_EVENT_NAME, (toastContext: ToastCmd) => {
     toast({
       variant: toastContext.variant ? toastContext.variant : "default",
       title: toastContext.title ? toastContext.title : undefined,
@@ -47,6 +47,6 @@ export default function ToastProvider({ children }: { children: React.ReactNode;
 }
 
 
-export function triggerToast(toastContext: ToastContext){
+export function popToast(toastContext: ToastCmd){
   EventEmitter.getInstance().emit(TOAST_EVENT_NAME, toastContext);
 }

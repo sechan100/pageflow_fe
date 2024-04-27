@@ -1,20 +1,27 @@
-import { AccessToken, AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "@/bounded-context/user/model/PrivatePropertyAccessTokenStorage";
-import { triggerToast } from "@/global/provider/ToastProvider";
+import { popToast } from "@/global/provider/ToastProvider";
 import { rootAuth } from "./rootAuth";
-import { anonymousApi } from "@/global/api/anonymousApi";
+import { AccessTokenStorage, PrivatePropertyAccessTokenStorage } from "./PrivatePropertyAccessTokenStorage";
+import { AccessToken } from "../types/token";
+import { api } from "@/global/api/ApiBuilder";
 
 
-
-// AccessToken 저장소 인스턴스
+// AccessToken 저장소 인스턴스를 생성
 const storage: AccessTokenStorage = new PrivatePropertyAccessTokenStorage();
 
-const { isAuthenticated, deAuthenticate } = rootAuth;
+// 실제 accessToken, refreshToken으로 표현되는 인증 상태를 rootAuth와 동기화하기 위해서 상태 업데이트 함수를 가져옴
+const { isAuthenticated } = rootAuth;
 
-// 캐싱된 토큰을 사용하던, refresh하던 유효한 토큰을 반환하는 비동기 함수
-const ensureToken: () => Promise<string> = async () => {
-  // [0]: root 인증상태 확인후, 익명이라면 에러
+
+
+/** 
+ * 유효한 AccessToken을 반환한다. storage에 유효한 토큰을 캐싱중이라면 반환하고, 없다면 refresh를 시도한다. 
+ */
+const getValidAccessToken: () => Promise<string> 
+= async () => {
+
   if(!isAuthenticated()){
-    throw new Error("인증되지 않은 사용자는 'ensureToken()'으로 토큰을 가져올 수 없습니다.");
+    // rootAuth가 먼저임
+    throw new Error("먼저 client 전역 인증상태를 변경해야합니다.");
   }
 
   const isTokenExist: boolean = storage.isTokenExist();
@@ -27,60 +34,33 @@ const ensureToken: () => Promise<string> = async () => {
     if(storage.isTokenExpired()){
       isRefreshRequired = true;
     }
-  // 토큰 없음 -> isAuthentication이 true라면, refresh 요청을 보냄
+  // 토큰 없음 -> refresh 요청을 보냄
   } else {
-    if(isAuthenticated()){
-      isRefreshRequired = true;
-    }
+    isRefreshRequired = true;
   }
 
   // [3]: accessToken이 없다면 refresh 요청을 보내고, 새로운 토큰을 받아옴
   if(isRefreshRequired){
   
     // refresh 요청전송
-    const accessToken = await anonymousApi
-      .post("/session/refresh")
-      .actions({
-        TOKEN_NOT_FOUND, // refreshTokenUUID 쿠키가 없는 경우 -> 세션 없음
-        SESSION_EXPIRED // refreshTokenUUID 쿠키가 있지만, 만료된 경우 -> 세션 만료
-      })
+    const res = await api()
+      .anonymous()
+      .post("/auth/session/refresh")
       .fetch<AccessToken>();
 
     // 받아온 토큰 저장 후 반환.
-    storage.store(accessToken);
-    return accessToken.compact;
+    storage.store(res.data);
+    return res.data.compact;
   
     // [4]: refresh 요청을 보내지 않고, 유효한 기존의 토큰을 그대로 반환
   } else {
     return storage.getToken();
   }
 }
-// CodeActions
-function TOKEN_NOT_FOUND(){
-  deAuthenticate(); // localStorage 인증상태 제거
-  triggerToast({
-    title: "로그인이 필요합니다",
-    action: {
-      description: "로그인하러 가기",
-      onClick: () => { console.log("로그인 페이지로 이동"); }
-    }
-  });
-}
-
-function SESSION_EXPIRED(){
-  deAuthenticate(); // localStorage 인증상태 제거
-  triggerToast({
-    title: "만료된 세션입니다. 다시 로그인 해주세요.",
-    action: {
-      description: "로그인하러 가기",
-      onClick: () => { console.log("로그인 페이지로 이동"); }
-    }
-  });
-}
 
 
 export const accessTokenManager = {
-  ensureToken,
+  getValidAccessToken,
 
   storeToken: (token: AccessToken) => {
     storage.store(token);

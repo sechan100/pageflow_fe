@@ -20,7 +20,12 @@ import {
 import { Input } from "@/shared/components/shadcn/input"
 import { zodUserSchemata } from "@/bounded-context/user/shared/UserSchemata";
 import OAuth2LoginWidget from "./OAuth2LoginWidget";
-import { useSession } from "../model/useSession";
+import { useSession } from "../hooks/useSession";
+import { sessionApi } from "../api/sessionApi";
+import { ApiResponse } from "@/global/api/types/apiTypes";
+import { AccessToken } from "../types/token";
+import { useState } from "react";
+import { FieldErrorMessage } from "@/shared/components/custom/fieldErrorMessage";
 
 
 export default function LoginTrigger({className}: {className?: string}){
@@ -41,31 +46,34 @@ export default function LoginTrigger({className}: {className?: string}){
 }
 
 function LoginDialogForm(){
+  const { login } = useSession();
+  const [code, setCode] = useState<number>(0);
 
-  const { formLogin } = useSession();
+  interface LoginForm {
+    username: string;
+    password: string;
+  }
   
-  const loginFormSchema = z.object({
-    username: zodUserSchemata.username,
-    password: zodUserSchemata.password
-  })
-  
-  const loginForm = useForm<z.infer<typeof loginFormSchema>>({
-    resolver: zodResolver(loginFormSchema),
+  const loginForm = useForm<LoginForm>({
     defaultValues: {
-      username: "testuser1",
-      password: "testuser1",
-    },
+    username: "sechan100",
+      password: "sechan100",
+    }
   })
 
+  const onSubmitRequest: (form: LoginForm) => void
+  = async ({username, password}) => {
+    const res = await sessionApi.formLogin(username, password);
+    res.match(
+    {
+      success: ({data}) => login(data),
+      default: ({code}) => {setCode(code)}
+    })
+  }
 
   return (
     <Form {...loginForm}>
-      <form id="login_form" onSubmit={loginForm.handleSubmit(
-        ({username, password}) => {
-          // form 제출 시 로그인 함수 실행
-          formLogin(username, password);
-        }
-      )} className="space-y-2">
+      <form id="login_form" onSubmit={loginForm.handleSubmit((form) => onSubmitRequest(form))} className="space-y-2">
 
         {/* username 필드 */}
         <FormField
@@ -78,6 +86,7 @@ function LoginDialogForm(){
                 <Input placeholder="username" {...field} />
               </FormControl>
               <FormMessage />
+              <FieldErrorMessage when={code == 3000}>아이디를 확인해주세요</FieldErrorMessage>
             </FormItem>
           )}
         />
@@ -93,6 +102,7 @@ function LoginDialogForm(){
                 <Input type="password" placeholder="password" {...field} />
               </FormControl>
               <FormMessage />
+              <FieldErrorMessage when={code == 4100}>비밀번호가 일치하지 않습니다</FieldErrorMessage>
             </FormItem>
           )}
         />
