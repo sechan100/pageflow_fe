@@ -1,15 +1,15 @@
 import { api } from "@/global/api/ApiBuilder";
 import { SignupForm } from "../types/form";
+import { ApiResponse } from "@/global/api/types/apiTypes";
 
-const signup = async (form: SignupForm) => {
+const signupApi: (form: SignupForm) => Promise<ApiResponse<void>>
+= async (form: SignupForm) => {
   // 회원가입 요청 전송
-  await api()
+  return await api()
   .anonymous()
   .post("/signup")
   .data(form)
   .fetch<void>();
-  Promise.resolve();
 }
 
-export default signup;
-export type { SignupForm };
+export { signupApi };

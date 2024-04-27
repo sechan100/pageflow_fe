@@ -19,6 +19,7 @@ import {
 } from "@/shared/components/shadcn/tooltip"
 import clsx from "clsx";
 import { useSession } from "../hooks/useSession";
+import { logoutApi } from "../api/sessionApi";
 
 
 
@@ -38,6 +39,10 @@ export default function UserInfoWidget({className} : {className?: string}){
   }
   const user = session.user;
 
+  const doLogout = async () => {
+    await logoutApi()
+    logout();
+  }
 
   return (
     <div className={className}>
@@ -66,7 +71,7 @@ export default function UserInfoWidget({className} : {className?: string}){
           <DropdownMenuSeparator />
           <DDLink href="/account" name="계정 설정" icon={<UserCog />} />
           <DDLink href="/support" name="고객센터" icon={<Phone />} />
-          <DDAction onClick={logout} name="로그아웃" icon={<LogOut />} />
+          <DDAction onClick={doLogout} name="로그아웃" icon={<LogOut />} />
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

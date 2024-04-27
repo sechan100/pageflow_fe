@@ -1,18 +1,16 @@
 import { rootAuth } from "../model/rootAuth";
-import { useState } from "react";
 import { AccessToken } from "../types/token";
 import { accessTokenManager } from "../model/accessTokenManager";
 import { useSessionQuery } from "../api/useSessionQuery";
 import { create } from "zustand";
 
 
-const { authenticate, deAuthenticate } = rootAuth;
 const { storeToken, clearToken } = accessTokenManager;
 
 export interface IUseSession {
   isAuthenticated: boolean;
-  login: (accessToken: AccessToken) => Promise<void>;
-  logout: () => Promise<void>;
+  login: (accessToken: AccessToken) => void;
+  logout: () => void;
   session: ReturnType<typeof useSessionQuery>["data"];
   isSessionLoading: ReturnType<typeof useSessionQuery>["isLoading"];
 }
@@ -24,7 +22,7 @@ interface IAuthenticationStore {
 
 // ZUSTAND
 const useAuthenticationStore = create<IAuthenticationStore>(set => ({
-  isAuthenticated: false,
+  isAuthenticated: rootAuth.isAuthenticated(),
   setIsAuthenticated: (isAuthenticated: boolean) => set({isAuthenticated})
 }));
 
@@ -35,16 +33,16 @@ export const useSession: () => IUseSession
   const sessionQuery = useSessionQuery(isAuthenticated);
   
   // 로그인
-  const login = async (accessToken : AccessToken) => {
-    authenticate();
+  const login = (accessToken : AccessToken) => {
+    rootAuth.authenticate();
     storeToken(accessToken);
     // 상태 업데이트 -> useQuery의 세션 정보 캐싱을 트리거
     setIsAuthenticated(true);
   }
 
   // 로그아웃
-  const logout = async () => {
-    deAuthenticate();
+  const logout = () => {
+    rootAuth.deAuthenticate();
     clearToken();
     sessionQuery.remove();
     setIsAuthenticated(false);

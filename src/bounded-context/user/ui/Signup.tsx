@@ -19,7 +19,11 @@ import {
 } from "@/shared/components/shadcn/form"
 import { Input } from "@/shared/components/shadcn/input"
 import { zodUserSchemata } from "@/bounded-context/user/shared/UserSchemata";
-import signup, { SignupForm } from "@/bounded-context/user/api/signup";
+import { SignupForm } from "../types/form";
+import { signupApi } from "../api/signup";
+import { popToast } from "@/global/provider/ToastProvider";
+import { useState } from "react";
+import { FieldErrorMessage } from "@/shared/components/custom/fieldErrorMessage";
 
 
 
@@ -44,6 +48,8 @@ export default function SignupTrigger({className}: {className?: string}){
 
 
 function SignupDialogForm(){
+
+  const [code, setCode] = useState<number>(0)
 
   // Zod 스키마 정의
   const signupFormSchema = z.object({
@@ -81,7 +87,7 @@ function SignupDialogForm(){
     },
   })
 
-  function onSubmit(values: z.infer<typeof signupFormSchema>) {
+  const onSubmitRequest = async (values: z.infer<typeof signupFormSchema>) => {
     const signupForm: SignupForm = {
       username: values.username,
       password: values.passwordSchema.password,
@@ -89,12 +95,19 @@ function SignupDialogForm(){
       penname: values.penname,
       profileImgUrl: null
     }
-    signup(signupForm)
+    const res = await signupApi(signupForm);
+
+    res.dispatch(builder => builder
+      .success(() => popToast({
+        description: "회원가입이 완료되었습니다!"
+      }))
+      .defaultWithToast()
+    )
   }
 
   return (
     <Form {...signupForm}>
-      <form id="signup_form" onSubmit={signupForm.handleSubmit(onSubmit)} className="space-y-2">
+      <form id="signup_form" onSubmit={signupForm.handleSubmit(onSubmitRequest)} className="space-y-2">
 
         {/* username 필드 */}
         <FormField

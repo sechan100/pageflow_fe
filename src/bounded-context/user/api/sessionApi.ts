@@ -4,7 +4,7 @@ import { ApiResponse } from "@/global/api/types/apiTypes";
 
 
 
-const formLogin: (username: string, password: string) => Promise<ApiResponse<AccessToken>>
+const formLoginApi: (username: string, password: string) => Promise<ApiResponse<AccessToken>>
 = async (username: string, password: string) => { 
   return await api()
     .anonymous()
@@ -23,7 +23,7 @@ const formLogin: (username: string, password: string) => Promise<ApiResponse<Acc
 //   .fetch<AccessToken>();
 // }
 
-const logout: () => Promise<ApiResponse<void>>
+const logoutApi: () => Promise<ApiResponse<void>>
 = async () => {
   return await api()
   .authenticated()
@@ -32,8 +32,8 @@ const logout: () => Promise<ApiResponse<void>>
 }
 
 
-export const sessionApi = {
-  formLogin,
+export {
+  formLoginApi,
   // oauth2Login,
-  logout
+  logoutApi
 }

@@ -1,13 +1,10 @@
 'use client';
-
 import { Button } from "@/shared/components/shadcn/button";
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
 } from "@/shared/components/shadcn/dialog";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -18,14 +15,10 @@ import {
   FormMessage,
 } from "@/shared/components/shadcn/form"
 import { Input } from "@/shared/components/shadcn/input"
-import { zodUserSchemata } from "@/bounded-context/user/shared/UserSchemata";
 import OAuth2LoginWidget from "./OAuth2LoginWidget";
 import { useSession } from "../hooks/useSession";
-import { sessionApi } from "../api/sessionApi";
-import { ApiResponse } from "@/global/api/types/apiTypes";
-import { AccessToken } from "../types/token";
-import { useState } from "react";
-import { FieldErrorMessage } from "@/shared/components/custom/fieldErrorMessage";
+import { formLoginApi } from "../api/sessionApi";
+
 
 
 export default function LoginTrigger({className}: {className?: string}){
@@ -47,7 +40,6 @@ export default function LoginTrigger({className}: {className?: string}){
 
 function LoginDialogForm(){
   const { login } = useSession();
-  const [code, setCode] = useState<number>(0);
 
   interface LoginForm {
     username: string;
@@ -63,12 +55,12 @@ function LoginDialogForm(){
 
   const onSubmitRequest: (form: LoginForm) => void
   = async ({username, password}) => {
-    const res = await sessionApi.formLogin(username, password);
-    res.match(
-    {
-      success: ({data}) => login(data),
-      default: ({code}) => {setCode(code)}
-    })
+    const res = await formLoginApi(username, password);
+
+    res.dispatch(builder => builder
+      .success(data => login(data))
+      .defaultWithToast()
+    )
   }
 
   return (
@@ -86,7 +78,6 @@ function LoginDialogForm(){
                 <Input placeholder="username" {...field} />
               </FormControl>
               <FormMessage />
-              <FieldErrorMessage when={code == 3000}>아이디를 확인해주세요</FieldErrorMessage>
             </FormItem>
           )}
         />
@@ -102,7 +93,6 @@ function LoginDialogForm(){
                 <Input type="password" placeholder="password" {...field} />
               </FormControl>
               <FormMessage />
-              <FieldErrorMessage when={code == 4100}>비밀번호가 일치하지 않습니다</FieldErrorMessage>
             </FormItem>
           )}
         />
