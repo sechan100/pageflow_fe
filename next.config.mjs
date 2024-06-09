@@ -10,6 +10,11 @@ const nextConfig = {
     ];
   },
 
+  images: {
+    domains: ['localhost'],
+  },
+
+
   webpack: (config, { dev }) => { // 웹팩 컴파일 설정
     if (!dev) {
       config.optimization.minimizer = [

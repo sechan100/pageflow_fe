@@ -1,10 +1,10 @@
 
 
-interface Session {
+export interface Session {
   user: SessionUser;
 }
 
-interface SessionUser {
+export interface SessionUser {
   uid: string;
   username: string;
   email: string;

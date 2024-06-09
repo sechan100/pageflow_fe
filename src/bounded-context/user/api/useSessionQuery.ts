@@ -1,5 +1,6 @@
 import { api } from "@/global/api/ApiBuilder";
 import { UseQueryResult, useQuery } from "react-query";
+import { Session } from "../types/session";
 
 
 
@@ -7,7 +8,7 @@ const queryFn = async () => {
   const res = await api()
   .authenticated()
   .get("/auth/session/info")
-  .fetch<Session>();
+  .fetch();
 
   if(res.code === 2000){
     return res.data as Session;

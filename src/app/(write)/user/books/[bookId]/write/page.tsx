@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@radix-ui/react-collapsible";
 import { Separator } from "@/shared/components/shadcn/separator";
 import { Book, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { useOutline } from "@/bounded-context/book/model/useOutline";
+import { useOutline } from "@/bounded-context/book/hooks/useOutline";
 import Link from "next/link";
 import OutlineBook from "@/bounded-context/book/ui/outline/OutlineBook";
 
