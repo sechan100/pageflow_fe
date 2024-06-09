@@ -19,11 +19,10 @@ import {
 } from "@/shared/components/shadcn/form"
 import { Input } from "@/shared/components/shadcn/input"
 import { zodUserSchemata } from "@/bounded-context/user/shared/UserSchemata";
-import { SignupForm } from "../types/form";
-import { signupApi } from "../api/signup";
+import { SignupForm, signupApi } from "../api/signup";
 import { popToast } from "@/global/provider/ToastProvider";
 import { useState } from "react";
-import { FieldErrorMessage } from "@/shared/components/custom/fieldErrorMessage";
+import { FieldError } from "@/global/api/commonResponseTypes";
 
 
 
@@ -31,6 +30,7 @@ import { FieldErrorMessage } from "@/shared/components/custom/fieldErrorMessage"
 
 
 export default function SignupTrigger({className}: {className?: string}){
+
   return (
   <div className={className}>
     <Dialog modal>
@@ -46,10 +46,7 @@ export default function SignupTrigger({className}: {className?: string}){
   )
 }
 
-
 function SignupDialogForm(){
-
-  const [code, setCode] = useState<number>(0)
 
   // Zod 스키마 정의
   const signupFormSchema = z.object({
@@ -88,20 +85,30 @@ function SignupDialogForm(){
   })
 
   const onSubmitRequest = async (values: z.infer<typeof signupFormSchema>) => {
-    const signupForm: SignupForm = {
+    const requestForm: SignupForm = {
       username: values.username,
       password: values.passwordSchema.password,
       email: values.email,
       penname: values.penname,
       profileImgUrl: null
     }
-    const res = await signupApi(signupForm);
-
-    res.dispatch(builder => builder
-      .success(() => popToast({
-        description: "회원가입이 완료되었습니다!"
-      }))
-      .defaultWithToast()
+    // 회원가입 요청 전송
+    const res = await signupApi.signup(requestForm);
+    res.dispatch(b => b
+      .when(4100, (res) => {
+        res.data.errors.forEach(
+          (error: FieldError) => signupForm.setError(
+            // @ts-ignore
+            error.field, { type: "manual", message: error.message}
+          )
+        )
+      })
+      .success(() => {
+        popToast({
+          title: "회원가입 성공",
+          description: "회원가입이 완료되었습니다.",
+        })
+      })
     )
   }
 

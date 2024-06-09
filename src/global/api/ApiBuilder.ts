@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
-import { ApiCodeActionsSpecification as ApiCodeActionSpecification, ApiResponse, ApiResponseImpl, PlainDtoApiResponse } from "./types/apiTypes";
+import { ApiResponse, ApiResponseImpl, PlainDtoApiResponse } from "./ApiResponse";
 import { accessTokenManager } from "@/bounded-context/user/model/accessTokenManager";
 
 
@@ -24,7 +24,7 @@ export interface Api {
   params(params: any): Api;
   param(key: string, value: string): Api;
   contentType(type: string): Api;
-  fetch<T>(): Promise<ApiResponse<T>>;
+  fetch(): Promise<ApiResponse>;
 }
 
 
@@ -111,7 +111,7 @@ class ApiBuilder implements Api, IApiSetMethodAndUri, IApiSetAuth {
   }
 
   // 요청 전송
-  async fetch<T>(): Promise<ApiResponse<T>> {
+  async fetch<T>(): Promise<ApiResponse> {
     // 전처리
     if(!this.#auth){
       delete this.#config.headers?.Authorization;
@@ -121,8 +121,8 @@ class ApiBuilder implements Api, IApiSetMethodAndUri, IApiSetAuth {
 
     // 요청 + 응답 시간 측정
     const startTime = performance.now();
-    const axiosRes = await axios.request<PlainDtoApiResponse<T>>(this.#config);
-    const res: ApiResponse<T> = new ApiResponseImpl(axiosRes.data);
+    const axiosRes = await axios.request<PlainDtoApiResponse>(this.#config);
+    const res: ApiResponse = new ApiResponseImpl(axiosRes.data);
     const endTime = performance.now();
     const timeTaken = endTime - startTime;
     // 요청 + 응답 시간 측정 끝

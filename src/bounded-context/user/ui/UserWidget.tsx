@@ -19,7 +19,7 @@ import {
 } from "@/shared/components/shadcn/tooltip"
 import clsx from "clsx";
 import { useSession } from "../hooks/useSession";
-import { logoutApi } from "../api/sessionApi";
+import { sessionApi } from "../api/sessionApi";
 
 
 
@@ -40,7 +40,7 @@ export default function UserInfoWidget({className} : {className?: string}){
   const user = session.user;
 
   const doLogout = async () => {
-    await logoutApi()
+    await sessionApi.logout()
     logout();
   }
 

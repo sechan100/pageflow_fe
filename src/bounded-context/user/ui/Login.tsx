@@ -17,7 +17,7 @@ import {
 import { Input } from "@/shared/components/shadcn/input"
 import OAuth2LoginWidget from "./OAuth2LoginWidget";
 import { useSession } from "../hooks/useSession";
-import { formLoginApi } from "../api/sessionApi";
+import { sessionApi } from "../api/sessionApi";
 
 
 
@@ -38,6 +38,7 @@ export default function LoginTrigger({className}: {className?: string}){
   )
 }
 
+// form dialog
 function LoginDialogForm(){
   const { login } = useSession();
 
@@ -48,18 +49,19 @@ function LoginDialogForm(){
   
   const loginForm = useForm<LoginForm>({
     defaultValues: {
-    username: "sechan100",
-      password: "sechan100",
+    username: "tuser1",
+      password: "tuser1",
     }
   })
 
+  // form 태그 제출시..
   const onSubmitRequest: (form: LoginForm) => void
   = async ({username, password}) => {
-    const res = await formLoginApi(username, password);
+    const res = await sessionApi.formLogin(username, password);
 
-    res.dispatch(builder => builder
-      .success(data => login(data))
-      .defaultWithToast()
+    res.dispatch(b => b
+      .success(accessToken => login(accessToken))
+      .pop(3000, "아이디, 또는 비밀번호를 확인해주세요.")
     )
   }
 

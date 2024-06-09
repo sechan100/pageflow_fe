@@ -1,39 +1,38 @@
 import { api } from "@/global/api/ApiBuilder"
 import { AccessToken } from "../types/token"
-import { ApiResponse } from "@/global/api/types/apiTypes";
+import { ApiResponse } from "@/global/api/ApiResponse";
 
 
 
-const formLoginApi: (username: string, password: string) => Promise<ApiResponse<AccessToken>>
-= async (username: string, password: string) => { 
+const formLogin: (username: string, password: string) => Promise<ApiResponse>
+= async (username, password) => { 
   return await api()
     .anonymous()
     .post("/auth/login")
     .contentType("application/x-www-form-urlencoded")
     .data({username, password})
-    .fetch<AccessToken>()
+    .fetch()
 }
 
-// const oauth2Login: (provider: string) => Promise<AccessToken>
-//  = async (provider: string) => {
-//   const accessToken = await api()
-//   .anonymous()
-//   .get(authorizationCodeUri)
-//   .addAction(OAUTH2_SIGNUP_REQUIRED, (res) => router.push("/signup/oauth2", {signupCache: res.data}))
-//   .fetch<AccessToken>();
-// }
+const oauth2Login: (authorizationCodeUri: string) => Promise<ApiResponse>
+= async (authorizationCodeUri) => {
+  return await api()
+  .anonymous()
+  .get(authorizationCodeUri)
+  .fetch();
+}
 
-const logoutApi: () => Promise<ApiResponse<void>>
+const logout: () => Promise<ApiResponse>
 = async () => {
   return await api()
   .authenticated()
   .post("/auth/session/logout")
-  .fetch<void>();
+  .fetch();
 }
 
 
-export {
-  formLoginApi,
-  // oauth2Login,
-  logoutApi
+export const sessionApi = {
+  formLogin,
+  oauth2Login,
+  logout
 }

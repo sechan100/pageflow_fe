@@ -8,7 +8,9 @@ import { Button } from "@/shared/components/shadcn/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRouting } from "@/shared/hook/useRouting";
-import signup, { SignupForm } from "@/bounded-context/user/api/signup";
+import { signupApi, SignupForm }  from "@/bounded-context/user/api/signup";
+import { ApiResponse } from "@/global/api/ApiResponse";
+import { FieldError, FieldErrors } from "@/global/api/commonResponseTypes";
 
 
 
@@ -40,17 +42,27 @@ export default function OAuth2SignupForm(){
   })
 
   // 제출 이벤트 콜백
-  function onSubmit(values: z.infer<typeof signupFormSchema>){
+  async function onSubmit(values: z.infer<typeof signupFormSchema>){
     // Post 요청에 담을 객체를 생성
-    const signupForm: SignupForm = {
+    const requestForm: SignupForm = {
       username: signupCache.username,
-      password: signupCache.password,
+      password: signupCache.password ?? "oauth2DummyPassword111",
       email: values.email,
       penname: values.penname,
       profileImgUrl: signupCache.profileImgUrl,
     }
     // 회원가입 요청 전송
-    signup(signupForm);
+    const res = await signupApi.signup(requestForm);
+    res.dispatch(b => b
+      .when(4100, (res) => {
+        res.data.errors.forEach(
+          (error: FieldError) => signupForm.setError(
+            // @ts-ignore
+            error.field, { type: "manual", message: error.message}
+          )
+        )
+      })
+    )
   }
 
   return (

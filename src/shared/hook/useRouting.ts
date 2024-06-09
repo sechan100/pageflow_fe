@@ -32,6 +32,7 @@ const useUrlState = create<UrlState>((set, get) => ({
   },
 }));
 
+// next에서 제공하는 route hook에 기능을 추가하여 확장한 커스텀 hook
 export const useRouting = () => {
   const router = useRouter();
   const params = useParams();
